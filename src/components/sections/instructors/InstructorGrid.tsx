@@ -53,20 +53,27 @@ export function InstructorGrid({ team }: Props) {
           z-index: 3;
           overflow-y: auto;
         }
-        .ig-card:hover .ig-img,
-        .ig-card:focus-within .ig-img {
-          transform: scale(1.04);
-          filter: brightness(.55);
+        @media (hover: hover) and (pointer: fine) {
+          .ig-card:hover .ig-img,
+          .ig-card:focus-within .ig-img {
+            transform: scale(1.04);
+            filter: brightness(.55);
+          }
+          .ig-card:hover .ig-panel,
+          .ig-card:focus-within .ig-panel {
+            opacity: 1;
+            transform: translateY(0);
+          }
+          .ig-card:hover .ig-name,
+          .ig-card:focus-within .ig-name {
+            opacity: 0;
+            transform: translateY(-4px);
+          }
         }
-        .ig-card:hover .ig-panel,
-        .ig-card:focus-within .ig-panel {
-          opacity: 1;
-          transform: translateY(0);
-        }
-        .ig-card:hover .ig-name,
-        .ig-card:focus-within .ig-name {
-          opacity: 0;
-          transform: translateY(-4px);
+        @media (prefers-reduced-motion: reduce) {
+          .ig-card .ig-img,
+          .ig-card .ig-panel,
+          .ig-card .ig-name { transition: none; }
         }
         .ig-label {
           font-family: var(--font-body);
@@ -140,11 +147,6 @@ export function InstructorGrid({ team }: Props) {
           transition: opacity 200ms ease;
         }
         .ig-book:hover { opacity: .82; }
-        @media (prefers-reduced-motion: reduce) {
-          .ig-card .ig-img,
-          .ig-card .ig-panel,
-          .ig-card .ig-name { transition: none; }
-        }
         @media (max-width: 1024px) {
           .ig-card .ig-panel { padding: 32px 32px; }
           .ig-card .ig-pname { font-size: 32px; margin-bottom: 14px; }

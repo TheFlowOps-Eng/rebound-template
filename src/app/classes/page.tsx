@@ -2,6 +2,7 @@ import { classesContent } from "@/content/classes";
 import { buildMetadata } from "@/lib/seo";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ClassLibrary } from "@/components/sections/classes/ClassLibrary";
+import { WordmarkBand } from "@/components/sections/home/WordmarkBand";
 
 export const metadata = buildMetadata({
   title: "Classes",
@@ -14,6 +15,11 @@ export default function ClassesPage() {
     <>
       <PageHeader {...classesContent.header} />
       <ClassLibrary filters={classesContent.filters} items={classesContent.items} />
+      <WordmarkBand
+        background="/assets/footer-bg.jpg"
+        logo="/assets/footer-logo.png"
+        alt="Re:Bound"
+      />
     </>
   );
 }
