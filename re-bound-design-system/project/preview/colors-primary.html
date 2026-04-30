@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Colors — Primary</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { margin: 0; padding: 24px; background: var(--ivory); font-family: var(--font-label); }
+  .row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .sw { aspect-ratio: 1.5 / 1; display: flex; flex-direction: column; justify-content: space-between; padding: 14px; }
+  .sw .name { font-size: 11px; letter-spacing: .13em; text-transform: uppercase; font-weight: 700; }
+  .sw .hex { font-size: 11px; letter-spacing: .08em; }
+  .bone { background: var(--bone); color: var(--espresso); border: 1px solid rgba(0,0,0,.08); }
+  .umber { background: var(--umber); color: var(--bone); }
+  .umber-deep { background: var(--umber-deep); color: var(--bone); }
+  .espresso { background: var(--espresso); color: var(--bone); }
+  .clove { background: var(--clove); color: var(--bone); }
+  .clay { background: var(--clay); color: var(--espresso); }
+</style></head>
+<body>
+  <div class="row">
+    <div class="sw bone"><span class="name">Bone</span><span class="hex">#EBECDD · surface</span></div>
+    <div class="sw umber"><span class="name">Umber</span><span class="hex">#6A3921 · accent</span></div>
+    <div class="sw umber-deep"><span class="name">Umber Deep</span><span class="hex">#200C02 · hero bg</span></div>
+    <div class="sw espresso"><span class="name">Espresso</span><span class="hex">#3D312B · text</span></div>
+    <div class="sw clove"><span class="name">Clove</span><span class="hex">#3E2D2D · text alt</span></div>
+    <div class="sw clay"><span class="name">Clay</span><span class="hex">#A89B83 · tertiary</span></div>
+  </div>
+</body></html>

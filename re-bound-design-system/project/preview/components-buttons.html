@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Buttons</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { margin: 0; padding: 32px; background: var(--bone); display: flex; flex-direction: column; gap: 18px; align-items: flex-start; }
+  .row { display: flex; gap: 14px; align-items: center; }
+  .btn { font-family: var(--font-label); font-weight: 700; font-size: 14px; letter-spacing: .13em; text-transform: uppercase; padding: 20px 40px; border: 0; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; border-radius: 0; }
+  .btn-primary { background: var(--umber); color: var(--bone); }
+  .btn-primary:hover { background: var(--umber-deep); }
+  .btn-inverse { background: var(--bone); color: var(--umber); border: 1px solid var(--umber); }
+  .btn-inverse:hover { background: var(--sand); }
+  .btn-sm { padding: 10px 20px; font-size: 11.4px; }
+  .btn-dark { background: var(--espresso); color: var(--bone); }
+  .inline { font-family: var(--font-label); font-weight: 400; font-size: 14px; letter-spacing: .13em; text-transform: uppercase; color: var(--espresso); text-decoration: underline; text-underline-offset: 6px; }
+  .meta { font-family: var(--font-label); font-size: 10px; letter-spacing: .13em; text-transform: uppercase; color: var(--fg-subtle); min-width: 100px; font-weight: 600; }
+</style></head>
+<body>
+  <div class="row"><span class="meta">Primary</span><button class="btn btn-primary">Book a Session</button><button class="btn btn-primary btn-sm">Book Now</button></div>
+  <div class="row"><span class="meta">Inverse</span><button class="btn btn-inverse">View All Classes</button><button class="btn btn-inverse btn-sm">View Studio</button></div>
+  <div class="row"><span class="meta">Inline</span><a class="inline" href="#">Book Foundation  →</a></div>
+</body></html>

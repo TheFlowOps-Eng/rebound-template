@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Imagery</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { margin: 0; padding: 14px; background: var(--bone); display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .img { aspect-ratio: 1/1; overflow: hidden; position: relative; }
+  .img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cap { position: absolute; bottom: 6px; left: 8px; right: 8px; color: white; font-family: var(--font-label); font-size: 10px; letter-spacing: .13em; text-transform: uppercase; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
+</style></head>
+<body>
+  <div class="img"><img src="../assets/studio-interior.jpg"><span class="cap">Architecture</span></div>
+  <div class="img"><img src="../assets/class-tile.jpg"><span class="cap">Method</span></div>
+  <div class="img"><img src="../assets/hero-banner.jpg"><span class="cap">Detail</span></div>
+  <div class="img"><img src="../assets/instructors-banner.jpg"><span class="cap">People · Motion</span></div>
+  <div class="img"><img src="../assets/foundation-class.png" style="object-position: top;"><span class="cap">Editorial</span></div>
+  <div class="img"><img src="../assets/founder-detail.jpg"><span class="cap">Polaroid</span></div>
+</body></html>

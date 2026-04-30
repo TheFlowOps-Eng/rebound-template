@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Navigation</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { margin: 0; background: url('../assets/hero-banner.jpg') center / cover no-repeat; height: 160px; position: relative; }
+  body::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(32,12,2,.35) 0%, rgba(32,12,2,0) 100%); }
+  nav { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; padding: 28px 40px; }
+  .logo { height: 28px; filter: invert(1) brightness(2); }
+  .links { display: flex; gap: 28px; }
+  .links a { font-family: var(--font-label); font-weight: 700; font-size: 12px; letter-spacing: .13em; text-transform: uppercase; color: var(--bone); text-decoration: none; }
+  .cta { background: var(--umber); color: var(--bone); padding: 18px 28px; font-family: var(--font-label); font-weight: 700; font-size: 12px; letter-spacing: .13em; text-transform: uppercase; }
+</style></head>
+<body>
+  <nav>
+    <img class="logo" src="../assets/rebound-wordmark.png" alt="Re:Bound">
+    <div class="links">
+      <a href="#">Home</a><a href="#">About</a><a href="#">Classes</a>
+      <a href="#">Pricing</a><a href="#">Studio</a><a href="#">Contact</a>
+    </div>
+    <div class="cta">Book Now</div>
+  </nav>
+</body></html>

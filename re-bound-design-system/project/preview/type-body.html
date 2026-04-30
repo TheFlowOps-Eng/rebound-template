@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Type — Body</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { margin: 0; padding: 32px 36px; background: var(--bone); font-family: var(--font-body); color: var(--clove); }
+  .stack { display: flex; flex-direction: column; gap: 16px; }
+  .row { display: flex; gap: 28px; align-items: flex-start; }
+  .meta { font-family: var(--font-label); font-size: 10px; letter-spacing: .13em; text-transform: uppercase; color: var(--fg-subtle); min-width: 140px; padding-top: 4px; font-weight: 600; flex-shrink: 0; }
+  .body-lg  { font-size: 20px; font-weight: 400; line-height: 1.5; max-width: 500px; }
+  .body     { font-size: 18px; font-weight: 400; line-height: 1.5; max-width: 500px; }
+  .caption  { font-size: 14px; font-weight: 400; line-height: 1.5; }
+</style></head>
+<body>
+  <div class="stack">
+    <div class="row"><span class="meta">Body Lg · 20 · 400</span><span class="body-lg">A method that asked me to slow down instead of speed up.</span></div>
+    <div class="row"><span class="meta">Body · 18 · 400</span><span class="body">The slower you go, the harder it gets. That's what makes it different.</span></div>
+    <div class="row"><span class="meta">Caption · 14 · 400</span><span class="caption">Level 2, 38 Jalan Telawi, Bangsar, Kuala Lumpur</span></div>
+  </div>
+</body></html>

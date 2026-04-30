@@ -1,0 +1,103 @@
+/* ============================================================
+   Re:Bound — Base styles.
+   All design tokens live in src/content/brand.ts and are emitted
+   by <BrandProvider/>. This file only contains element resets
+   and base typography rules that consume those tokens.
+   Local @font-face is handled by next/font/local in src/lib/fonts.ts.
+   ============================================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+::selection {
+  background: var(--umber);
+  color: var(--bone);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: opacity var(--dur) var(--ease-out);
+}
+
+a:hover {
+  opacity: 0.68;
+}
+
+a.underline {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.display,
+h1,
+h2,
+.h1,
+.h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: var(--tracking-display-tight);
+  line-height: var(--lh-display);
+  color: var(--fg);
+}
+
+h1,
+.h1 {
+  font-size: var(--fs-display-sm);
+  line-height: var(--lh-display-loose);
+}
+
+h2,
+.h2 {
+  font-size: var(--fs-h2);
+  letter-spacing: var(--tracking-display);
+}
+
+h3,
+.h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--fs-h3);
+  line-height: 1.2;
+  letter-spacing: var(--tracking-display);
+}
+
+p,
+.body {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--fg-muted);
+  letter-spacing: 0;
+}
+
+.body-lg {
+  font-size: var(--fs-body-lg);
+  line-height: var(--lh-body-loose);
+  font-weight: 400;
+}
+
+.body-sm {
+  font-size: var(--fs-body-sm);
+  font-weight: 400;
+}

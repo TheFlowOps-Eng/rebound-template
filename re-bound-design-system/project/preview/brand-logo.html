@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Brand Logo</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { margin: 0; display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh; font-family: var(--font-label); }
+  .panel { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 24px; }
+  .light { background: var(--bone); }
+  .dark  { background: var(--umber-deep); }
+  .logo { height: 52px; display: block; }
+  .label { font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }
+  .label.on-light { color: var(--fg-subtle); }
+  .label.on-dark  { color: var(--bone); opacity: .55; }
+</style></head>
+<body>
+  <div class="panel light">
+    <img class="logo" src="../assets/rebound-logo-dark.png" alt="Re:Bound \u2014 dark on cream">
+    <span class="label on-light">Dark on cream</span>
+  </div>
+  <div class="panel dark">
+    <img class="logo" src="../assets/rebound-logo-light.png" alt="Re:Bound \u2014 light on umber">
+    <span class="label on-dark">Light on umber</span>
+  </div>
+</body></html>

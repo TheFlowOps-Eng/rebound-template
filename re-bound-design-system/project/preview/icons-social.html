@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Icons — Social</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<style>
+  body { margin: 0; padding: 28px; background: var(--bone); display: flex; gap: 40px; align-items: center; justify-content: center; position: relative; min-height: 120px; }
+  .icon { width: 28px; height: 28px; color: var(--espresso); }
+  .icon svg { width: 100%; height: 100%; stroke-width: 1.5; }
+  .note { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); font-family: var(--font-label); font-size: 10px; letter-spacing: .13em; text-transform: uppercase; color: var(--fg-subtle); font-weight: 600; }
+</style></head>
+<body>
+  <i class="icon" data-lucide="facebook"></i>
+  <i class="icon" data-lucide="instagram"></i>
+  <i class="icon" data-lucide="twitter"></i>
+  <i class="icon" data-lucide="linkedin"></i>
+  <i class="icon" data-lucide="youtube"></i>
+  <div class="note">Lucide · 28 px · 1.5 stroke · espresso on cream</div>
+  <script>lucide.createIcons();</script>
+</body></html>

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Inputs</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { margin: 0; padding: 28px; background: var(--bone); display: flex; flex-direction: column; gap: 16px; }
+  label { font-family: var(--font-label); font-weight: 700; font-size: 16px; color: var(--clove); display: block; margin-bottom: 8px; }
+  input, textarea { font-family: 'Roboto', sans-serif; font-size: 16px; width: 100%; padding: 12px; border: 1px solid var(--ink); background: transparent; color: var(--espresso); border-radius: 0; box-sizing: border-box; }
+  input::placeholder, textarea::placeholder { color: rgba(0,0,0,.6); }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  textarea { height: 90px; resize: none; }
+</style></head>
+<body>
+  <div class="row">
+    <div><label>Full name</label><input type="text" placeholder="Placeholder"></div>
+    <div><label>Email</label><input type="email" placeholder="Placeholder"></div>
+  </div>
+  <div><label>Your Message</label><textarea placeholder="Type your message..."></textarea></div>
+</body></html>

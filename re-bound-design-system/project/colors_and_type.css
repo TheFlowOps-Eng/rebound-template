@@ -1,0 +1,240 @@
+/* ============================================================
+   Re:Bound — Colors & Type
+   A Lagree studio. Warm, quiet, considered.
+   ============================================================ */
+
+/* Webfonts -------------------------------------------------- */
+/* Red Hat Display — brand font for labels AND body (client-provided variable) */
+@font-face {
+  font-family: 'Red Hat Display';
+  src: url('fonts/RedHatDisplay-VariableFont_wght.ttf') format('truetype-variations');
+  font-weight: 300 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Red Hat Display';
+  src: url('fonts/RedHatDisplay-Italic-VariableFont_wght.ttf') format('truetype-variations');
+  font-weight: 300 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* Instrument Serif — brand display face (client-provided) */
+@font-face {
+  font-family: 'Instrument Serif';
+  src: url('fonts/InstrumentSerif-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Instrument Serif';
+  src: url('fonts/InstrumentSerif-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+:root {
+  /* =====================================================
+     PALETTE — earthy, warm, architectural
+     ===================================================== */
+
+  /* Primary neutrals ------------------------------------ */
+  --bone:        #EBECDD;   /* primary surface / the cream you see most */
+  --ivory:       #FEFFF0;   /* lightest — backdrops, paper */
+  --sand:        #F3F3F0;   /* secondary surface / inverted button */
+  --linen:       #FBFBF2;   /* subtle card */
+  --stone:       #D0D0C5;   /* divider cream */
+  --clay:        #A89B83;   /* muted taupe / tertiary card fill */
+
+  /* Accent earth tones ---------------------------------- */
+  --umber:       #6A3921;   /* brand brown — primary button & CTAs */
+  --umber-deep:  #200C02;   /* deepest brown — hero backdrops */
+
+  /* Ink (text) ------------------------------------------ */
+  --espresso:    #3D312B;   /* primary text on cream */
+  --clove:       #3E2D2D;   /* secondary text */
+  --ink:         #000000;   /* pure black — display & small caps */
+  --ash:         #2A2A2E;   /* near-black system text */
+  --carbon:      #242225;   /* tertiary */
+
+  /* On-dark --------------------------------------------- */
+  --white:       #FFFFFF;
+
+  /* Semantic aliases ------------------------------------ */
+  --bg:          var(--bone);
+  --bg-inverse:  var(--umber);
+  --bg-hero:     var(--umber-deep);
+  --surface:     var(--ivory);
+  --surface-alt: var(--linen);
+  --surface-muted: var(--clay);
+
+  --fg:          var(--espresso);
+  --fg-muted:    var(--clove);
+  --fg-subtle:   rgba(61, 49, 43, 0.64);
+  --fg-inverse:  var(--bone);
+  --fg-on-dark:  var(--bone);
+
+  --border:      var(--ink);
+  --border-soft: rgba(0, 0, 0, 0.12);
+  --divider:     rgba(0, 0, 0, 1);    /* hairline dividers are solid black, 1px */
+
+  --accent:      var(--umber);
+  --accent-fg:   var(--bone);
+
+  /* =====================================================
+     TYPOGRAPHY — two voices
+     Display serif (Instrument Serif — brand font)
+     Sans (Red Hat Display — used for labels AND body)
+     ===================================================== */
+
+  --font-display: 'Instrument Serif', 'Times New Roman', serif;
+  --font-label:   'Red Hat Display', system-ui, sans-serif;
+  --font-body:    'Red Hat Display', system-ui, -apple-system, sans-serif;
+
+  /* Type scale — rooted in Figma sizes ------------------ */
+  --fs-display-xl: 147px;   /* rare, full-page heroes */
+  --fs-display-lg: 100px;   /* primary page title */
+  --fs-display-md: 75px;    /* section hero */
+  --fs-display-sm: 62px;    /* large block headline */
+  --fs-display-xs: 50px;    /* card/tile headline */
+  --fs-h1:         48px;    /* content h1 */
+  --fs-h2:         36px;
+  --fs-h3:         28px;
+
+  --fs-eyebrow-lg: 17px;    /* section eyebrow */
+  --fs-eyebrow:    14px;    /* standard eyebrow / CTA */
+  --fs-eyebrow-sm: 12px;    /* micro label */
+
+  --fs-body-lg:    20px;    /* long-form body */
+  --fs-body:       18px;    /* default body */
+  --fs-body-sm:    16px;    /* footer body, form labels */
+  --fs-caption:    14px;    /* caption / meta */
+
+  /* Letterspacing --------------------------------------- */
+  --tracking-label: 0.130em;   /* every uppercase label */
+  --tracking-eyebrow: 0.200em; /* section eyebrow SMALL CAPS */
+  --tracking-display-tight: -0.030em; /* Instrument Serif large display */
+  --tracking-display: -0.010em;
+  --tracking-hero: 0.200em;    /* display caps like "Home" */
+
+  /* Line heights ---------------------------------------- */
+  --lh-display: 1.10;
+  --lh-display-loose: 1.22;
+  --lh-display-caps: 1.41;
+  --lh-label: 1.52;
+  --lh-body: 1.50;
+  --lh-body-loose: 1.52;
+
+  /* =====================================================
+     SPACING — 4pt base, loose in layout
+     ===================================================== */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  24px;
+  --space-6:  32px;
+  --space-7:  48px;
+  --space-8:  64px;
+  --space-9:  80px;   /* section stack */
+  --space-10: 120px;  /* section break */
+  --space-11: 160px;  /* hero break */
+
+  /* Layout ---------------------------------------------- */
+  --container-max: 1280px;
+  --page-gutter: 64px;
+  --nav-h: 92px;
+
+  /* Radii — mostly SQUARE. Only circular pagination dots/arrows. */
+  --radius-0: 0;
+  --radius-pill: 999px;
+  --radius-round: 50%;
+
+  /* Borders --------------------------------------------- */
+  --border-hair: 1px solid var(--ink);
+  --border-umber: 2px solid var(--umber);
+
+  /* Shadows — used sparingly; this brand prefers light + material over shadow */
+  --shadow-none: none;
+  --shadow-soft: 0 2px 24px rgba(32, 12, 2, 0.10);
+  --shadow-lift: 0 10px 40px rgba(32, 12, 2, 0.14);
+
+  /* Motion ---------------------------------------------- */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 180ms;
+  --dur: 300ms;
+  --dur-slow: 600ms;
+}
+
+/* ============================================================
+   SEMANTIC DEFAULTS
+   ============================================================ */
+html, body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Display — Instrument Serif Regular. Only weight 400 ships. */
+.display, h1, h2, .h1, .h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: var(--tracking-display-tight);
+  line-height: var(--lh-display);
+  color: var(--fg);
+}
+h1, .h1 { font-size: var(--fs-display-sm); line-height: var(--lh-display-loose); }
+h2, .h2 { font-size: var(--fs-h2); letter-spacing: var(--tracking-display); }
+h3, .h3 { font-family: var(--font-display); font-weight: 400; font-size: var(--fs-h3); line-height: 1.2; letter-spacing: var(--tracking-display); }
+
+.display-hero { font-family: var(--font-display); font-weight: 400; font-size: var(--fs-display-lg); line-height: var(--lh-display-caps); letter-spacing: var(--tracking-hero); }
+.display-xl   { font-family: var(--font-display); font-weight: 400; font-size: var(--fs-display-xl); line-height: var(--lh-display); letter-spacing: var(--tracking-display-tight); }
+.display-lg   { font-family: var(--font-display); font-weight: 400; font-size: var(--fs-display-md); line-height: var(--lh-display); letter-spacing: var(--tracking-display-tight); }
+.display-md   { font-family: var(--font-display); font-weight: 400; font-size: var(--fs-display-sm); line-height: var(--lh-display-loose); letter-spacing: var(--tracking-display-tight); }
+.display-sm   { font-family: var(--font-display); font-weight: 400; font-size: var(--fs-display-xs); line-height: var(--lh-display-loose); letter-spacing: var(--tracking-display-tight); }
+
+/* Eyebrow — Red Hat Display Bold, uppercase, wide tracking */
+.eyebrow {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--fs-eyebrow-lg);
+  letter-spacing: var(--tracking-eyebrow);
+  line-height: var(--lh-display-caps);
+  text-transform: uppercase;
+  color: var(--fg);
+}
+.eyebrow-sm {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--fs-eyebrow);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  line-height: var(--lh-label);
+}
+.eyebrow-xs {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--fs-eyebrow-sm);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  line-height: var(--lh-label);
+}
+
+/* Body — Red Hat Display at a softer weight so it reads as body, not label */
+p, .body { font-family: var(--font-body); font-weight: 400; font-size: var(--fs-body); line-height: var(--lh-body); color: var(--fg-muted); letter-spacing: 0; }
+.body-lg { font-size: var(--fs-body-lg); line-height: var(--lh-body-loose); font-weight: 400; }
+.body-sm { font-size: var(--fs-body-sm); font-weight: 400; }
+.caption { font-family: var(--font-label); font-weight: 700; font-size: var(--fs-caption); color: var(--fg); }
+
+/* Links — underline on hover; don't invent new link colors */
+a { color: inherit; text-decoration: none; transition: opacity var(--dur) var(--ease-out); }
+a:hover { opacity: 0.68; }
+a.underline { text-decoration: underline; text-underline-offset: 4px; }

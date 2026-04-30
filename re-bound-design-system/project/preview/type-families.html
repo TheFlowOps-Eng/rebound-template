@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Type families</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { margin: 0; padding: 30px; background: var(--bone); color: var(--espresso); display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+  .fam { display: flex; flex-direction: column; gap: 8px; }
+  .specimen { font-size: 64px; line-height: 1; }
+  .display { font-family: var(--font-display); font-weight: 400; letter-spacing: -0.02em; }
+  .display em { font-style: italic; }
+  .label-f { font-family: var(--font-label); font-weight: 800; font-size: 40px; letter-spacing: .02em; }
+  .body-f { font-family: var(--font-body); font-weight: 400; font-size: 46px; }
+  .name { font-family: var(--font-label); font-weight: 700; font-size: 13px; letter-spacing: .13em; text-transform: uppercase; color: var(--espresso); }
+  .sub { font-family: var(--font-label); font-weight: 400; font-size: 10px; letter-spacing: .13em; text-transform: uppercase; color: var(--fg-subtle); }
+</style></head>
+<body>
+  <div class="fam">
+    <div class="specimen display">Aa<em>Aa</em></div>
+    <div class="name">Instrument Serif</div>
+    <div class="sub">Display · client-provided</div>
+  </div>
+  <div class="fam">
+    <div class="specimen label-f">AA</div>
+    <div class="name">Red Hat Display</div>
+    <div class="sub">Labels · Google Fonts</div>
+  </div>
+  <div class="fam">
+    <div class="specimen body-f">Aa</div>
+    <div class="name">Red Hat Display</div>
+    <div class="sub">Body · same family, lighter weight</div>
+  </div>
+</body></html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Borders & Radii</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { margin: 0; padding: 28px; background: var(--bone); display: flex; gap: 20px; flex-wrap: wrap; font-family: var(--font-label); color: var(--fg-subtle); font-size: 10px; letter-spacing: .13em; text-transform: uppercase; font-weight: 700; }
+  .cell { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .sq { width: 60px; height: 60px; background: transparent; }
+  .hair { border: 1px solid var(--ink); }
+  .umb { border: 2px solid var(--umber); }
+  .rule { width: 120px; height: 3px; background: var(--espresso); align-self: center; }
+  .dot { width: 40px; height: 40px; border-radius: 50%; background: var(--espresso); }
+  .pill { width: 100px; height: 40px; border-radius: 999px; background: var(--umber); }
+</style></head>
+<body>
+  <div class="cell"><div class="sq hair"></div><span>Hairline<br>1px black</span></div>
+  <div class="cell"><div class="sq umb"></div><span>Photo frame<br>2px umber</span></div>
+  <div class="cell"><div class="rule"></div><span>Section rule<br>3px espresso</span></div>
+  <div class="cell"><div class="dot"></div><span>Dot<br>50%</span></div>
+  <div class="cell"><div class="pill"></div><span>Pill<br>999 · rare</span></div>
+  <div class="cell"><div class="sq" style="background: var(--umber);"></div><span>Button<br>radius 0</span></div>
+</body></html>

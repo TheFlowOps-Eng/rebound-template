@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Icon arrows + pagination</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { margin: 0; padding: 28px; background: var(--bone); display: flex; gap: 40px; align-items: center; }
+  .group { display: flex; align-items: center; gap: 14px; }
+  .arrow { width: 48px; height: 48px; border-radius: 50%; background: white; border: 1px solid var(--ink); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .arrow svg { width: 22px; height: 22px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--espresso); }
+  .dot.inactive { background: transparent; border: 1px solid var(--espresso); }
+  .label { font-family: var(--font-label); font-size: 10px; letter-spacing: .13em; text-transform: uppercase; color: var(--fg-subtle); font-weight: 600; }
+</style></head>
+<body>
+  <div class="group">
+    <span class="label">Carousel</span>
+    <button class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <button class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>
+  </div>
+  <div class="group">
+    <span class="label">Pagination</span>
+    <span class="dot"></span><span class="dot inactive"></span><span class="dot inactive"></span>
+  </div>
+</body></html>

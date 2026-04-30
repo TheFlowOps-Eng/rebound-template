@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Spacing</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { margin: 0; padding: 28px; background: var(--bone); font-family: var(--font-label); color: var(--espresso); }
+  .row { display: flex; align-items: center; gap: 18px; margin-bottom: 10px; font-size: 11px; letter-spacing: .13em; text-transform: uppercase; font-weight: 700; }
+  .bar { height: 16px; background: var(--umber); }
+  .name { min-width: 120px; color: var(--fg-subtle); }
+  .val { color: var(--fg-subtle); font-weight: 400; letter-spacing: .05em; }
+</style></head>
+<body>
+  <div class="row"><span class="name">space-3</span><div class="bar" style="width: 12px"></div><span class="val">12 px</span></div>
+  <div class="row"><span class="name">space-5</span><div class="bar" style="width: 24px"></div><span class="val">24 px</span></div>
+  <div class="row"><span class="name">space-7</span><div class="bar" style="width: 48px"></div><span class="val">48 px · card gap</span></div>
+  <div class="row"><span class="name">space-9</span><div class="bar" style="width: 80px"></div><span class="val">80 px · section stack</span></div>
+  <div class="row"><span class="name">space-10</span><div class="bar" style="width: 120px"></div><span class="val">120 px · section break</span></div>
+  <div class="row"><span class="name">space-11</span><div class="bar" style="width: 160px"></div><span class="val">160 px · hero break</span></div>
+</body></html>
