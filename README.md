@@ -75,6 +75,28 @@ All page copy and structured data live under `src/content/`. Edit those files to
 
 Images and the wordmark live in `public/assets/`. Reference them as absolute paths (e.g. `/assets/amara.jpg`).
 
+## OhhWells editor integration
+
+This template includes `src/components/layout/NavigationSync.tsx` — a small client component that posts the current pathname to the parent window via `postMessage` whenever the user navigates between pages.
+
+It enables the **OhhWells canvas editor** (app.ohhwells.com) to keep its page dropdown in sync when a visitor clicks links inside the iframe preview. Without it, the dropdown would only update when the user explicitly selects a page from the menu.
+
+**How it works:**
+
+```
+NavigationSync (client component)
+  → usePathname() fires on every App Router navigation
+  → window.parent.postMessage({ type: 'ow:navigation', path }, '*')
+
+Canvas editor (parent window)
+  → window.addEventListener('message', ...) picks it up
+  → updates the page Select to match
+```
+
+The component renders nothing and has zero effect on normal visitors — `window.parent === window` when the site is opened directly, so the `postMessage` call is never reached.
+
+**If you fork this template**, keep `NavigationSync` in `src/app/layout.tsx`. Removing it won't break anything functionally, but the page dropdown in the OhhWells editor will stop tracking in-iframe navigation.
+
 ## Responsive breakpoints
 
 The site uses three tiers, hand-rolled in inline `<style>` blocks per section:

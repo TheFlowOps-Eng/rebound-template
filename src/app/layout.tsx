@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { BrandProvider } from "@/components/layout/BrandProvider";
+import { NavigationSync } from "@/components/layout/NavigationSync";
 import { TopNav } from "@/components/layout/TopNav";
 import { Footer } from "@/components/layout/Footer";
 import { instrumentSerif, redHatDisplay } from "@/lib/fonts";
@@ -15,6 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${instrumentSerif.variable} ${redHatDisplay.variable}`}
     >
       <body>
+        <NavigationSync />
         <BrandProvider>
           <TopNav />
           {children}
