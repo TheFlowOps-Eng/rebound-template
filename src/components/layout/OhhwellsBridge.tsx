@@ -90,7 +90,15 @@ const TOOLBAR_GROUPS: Array<Array<{ cmd: string; title: string }>> = [
   ],
 ]
 
-function FloatingToolbar({ rect, onCommand }: { rect: DOMRect; onCommand: (cmd: string) => void }) {
+function FloatingToolbar({
+  rect,
+  onCommand,
+  activeCommands,
+}: {
+  rect: DOMRect
+  onCommand: (cmd: string) => void
+  activeCommands: Set<string>
+}) {
   const GAP = 8
   const APPROX_H = 36
   const above = rect.top >= APPROX_H + GAP
@@ -125,39 +133,46 @@ function FloatingToolbar({ rect, onCommand }: { rect: DOMRect; onCommand: (cmd: 
           {gi > 0 && (
             <span style={{ display: 'block', width: 1, height: 24, background: '#E7E5E4', flexShrink: 0 }} />
           )}
-          {btns.map((btn) => (
-            <button
-              key={btn.cmd}
-              title={btn.title}
-              onMouseDown={(e) => { e.preventDefault(); onCommand(btn.cmd) }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#F5F5F4' }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: 'none',
-                background: 'transparent',
-                borderRadius: 4,
-                cursor: 'pointer',
-                color: '#1C1917',
-                flexShrink: 0,
-                padding: 6,
-              }}
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                dangerouslySetInnerHTML={{ __html: ICONS[btn.cmd] }}
-              />
-            </button>
-          ))}
+          {btns.map((btn) => {
+            const isActive = activeCommands.has(btn.cmd)
+            return (
+              <button
+                key={btn.cmd}
+                title={btn.title}
+                onMouseDown={(e) => { e.preventDefault(); onCommand(btn.cmd) }}
+                onMouseEnter={(e) => {
+                  if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = '#F5F5F4'
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'transparent'
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: 'none',
+                  background: isActive ? '#EFF6FF' : 'transparent',
+                  borderRadius: 4,
+                  cursor: 'pointer',
+                  color: isActive ? '#0885FE' : '#1C1917',
+                  flexShrink: 0,
+                  padding: 6,
+                }}
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  dangerouslySetInnerHTML={{ __html: ICONS[btn.cmd] }}
+                />
+              </button>
+            )
+          })}
         </React.Fragment>
       ))}
     </div>
@@ -258,12 +273,14 @@ export function OhhwellsBridge() {
   const editStylesRef = useRef<{ base: HTMLStyleElement; forceHover: HTMLStyleElement } | null>(null)
   const activateRef = useRef<(el: HTMLElement) => void>(() => {})
   const deactivateRef = useRef<() => void>(() => {})
+  const refreshActiveCommandsRef = useRef<() => void>(() => {})
   const postToParentRef = useRef(postToParent)
   postToParentRef.current = postToParent
 
   const [toolbarRect, setToolbarRect] = useState<DOMRect | null>(null)
   const [toggleState, setToggleState] = useState<{ rect: DOMRect; isLocked: boolean } | null>(null)
   const [maxBadge, setMaxBadge] = useState<{ rect: DOMRect; current: number; max: number } | null>(null)
+  const [activeCommands, setActiveCommands] = useState<Set<string>>(new Set())
 
   const refreshForceHoverRules = useCallback(() => {
     editStylesRef.current?.forceHover &&
@@ -277,6 +294,7 @@ export function OhhwellsBridge() {
     activeElRef.current = null
     setToolbarRect(null)
     setMaxBadge(null)
+    setActiveCommands(new Set())
     postToParent({ type: 'ow:exit-edit' })
   }, [postToParent])
 
@@ -351,6 +369,9 @@ export function OhhwellsBridge() {
       const base = document.createElement('style')
       base.setAttribute('data-ohw-edit-style', '')
       base.textContent = `
+      [data-ohw-editable] {
+        display: block;
+      }
       [data-ohw-editable]:not([contenteditable]) { cursor: text !important; }
       [data-ohw-hovered]:not([contenteditable]) {
         outline: 2px dashed #0885FE !important;
@@ -364,6 +385,8 @@ export function OhhwellsBridge() {
         box-shadow: 0 0 0 4px rgba(8,133,254,0.12) !important;
         caret-color: #0885FE;
       }
+      [data-ohw-editable][contenteditable]::selection,
+      [data-ohw-editable][contenteditable] *::selection { background: rgba(8,133,254,0.35) !important; color: inherit !important; }
       [data-ohw-hover-card], [data-ohw-hover-card] * { pointer-events: none !important; }
       [data-ohw-hover-card][data-ohw-force-hover] [data-ohw-editable] { pointer-events: auto !important; }
     `
@@ -387,6 +410,15 @@ export function OhhwellsBridge() {
         e.preventDefault()
         activateRef.current(editable)
         return
+      }
+
+      // Don't deactivate if user drag-selected text from inside the editable to outside
+      if (activeElRef.current) {
+        const sel = window.getSelection()
+        if (sel && !sel.isCollapsed) {
+          const range = sel.getRangeAt(0)
+          if (activeElRef.current.contains(range.commonAncestorContainer)) return
+        }
       }
 
       const anchor = target.closest('a')
@@ -482,6 +514,7 @@ export function OhhwellsBridge() {
           el.innerHTML = html
         })
       }
+      postToParentRef.current({ type: 'ow:hydrate-done' })
     }
 
     window.addEventListener('message', handleHydrate)
@@ -507,6 +540,35 @@ export function OhhwellsBridge() {
       postToParentRef.current({ type: 'ow:save-result', nodes: collectEditableNodes() })
     }
 
+    const handleSelectionChange = () => {
+      if (!activeElRef.current) return
+      const next = new Set<string>()
+
+      // Toggle commands — queryCommandState is reliable for these
+      for (const cmd of ['bold', 'italic', 'underline', 'strikeThrough', 'insertUnorderedList', 'insertOrderedList']) {
+        try { if (document.queryCommandState(cmd)) next.add(cmd) } catch { /* ignore */ }
+      }
+
+      // Alignment — queryCommandState('justifyLeft') returns true by default even when centered,
+      // so derive it from computed textAlign on the selection's block element instead
+      const sel = window.getSelection()
+      const anchor = sel?.anchorNode
+      if (anchor) {
+        const el = anchor.nodeType === Node.TEXT_NODE ? anchor.parentElement : anchor as HTMLElement
+        const block = el?.closest<HTMLElement>('div, p, h1, h2, h3, h4, h5, h6, li, td, th') ?? el
+        if (block) {
+          const align = getComputedStyle(block).textAlign
+          if (align === 'center') next.add('justifyCenter')
+          else if (align === 'right' || align === 'end') next.add('justifyRight')
+          else next.add('justifyLeft')
+        }
+      }
+
+      setActiveCommands(next)
+    }
+
+    refreshActiveCommandsRef.current = handleSelectionChange
+
     window.addEventListener('message', handleSave)
     document.addEventListener('click', handleClick, true)
     document.addEventListener('paste', handlePaste, true)
@@ -515,6 +577,7 @@ export function OhhwellsBridge() {
     document.addEventListener('mouseout', handleMouseOut, true)
     document.addEventListener('mousemove', handleMouseMove, true)
     document.addEventListener('keydown', handleKeyDown)
+    document.addEventListener('selectionchange', handleSelectionChange)
     window.addEventListener('scroll', handleScroll, true)
 
     return () => {
@@ -525,6 +588,7 @@ export function OhhwellsBridge() {
       document.removeEventListener('mouseout', handleMouseOut, true)
       document.removeEventListener('mousemove', handleMouseMove, true)
       document.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('selectionchange', handleSelectionChange)
       window.removeEventListener('scroll', handleScroll, true)
       window.removeEventListener('message', handleSave)
       window.removeEventListener('message', handleHydrate)
@@ -560,6 +624,7 @@ export function OhhwellsBridge() {
     document.execCommand(cmd, false)
     activeElRef.current?.focus()
     if (activeElRef.current) setToolbarRect(activeElRef.current.getBoundingClientRect())
+    refreshActiveCommandsRef.current()
   }, [])
 
   const handleDefaultState = useCallback(() => {
@@ -578,7 +643,7 @@ export function OhhwellsBridge() {
   return (
     <>
       {toolbarRect && createPortal(
-        <FloatingToolbar rect={toolbarRect} onCommand={handleCommand} />,
+        <FloatingToolbar rect={toolbarRect} onCommand={handleCommand} activeCommands={activeCommands} />,
         document.body,
       )}
       {maxBadge && createPortal(
