@@ -1,7 +1,7 @@
 'use client'
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { usePathname, useSearchParams } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { isEditSessionActive } from '@/lib/ohw-session-search'
 type EditableNode = { key: string; type: string; text: string }
 
@@ -278,10 +278,12 @@ function StateToggle({
 
 export function OhhwellsBridge() {
   const pathname = usePathname()
+  const router = useRouter()
   const searchParams = useSearchParams()
   const isEditMode = isEditSessionActive()
 
-  const subdomain = searchParams.get('subdomain') ?? (() => {
+  const subdomainFromQuery = searchParams.get('subdomain')
+  const subdomain = subdomainFromQuery ?? (() => {
     if (typeof window === 'undefined') return ''
     const parts = window.location.hostname.split('.')
     // e.g. rebound-local-vl5l.ohhwells.site → ['rebound-local-vl5l', 'ohhwells', 'site']
@@ -386,6 +388,29 @@ export function OhhwellsBridge() {
   useEffect(() => {
     postToParent({ type: 'ow:navigation', path: pathname })
   }, [pathname, postToParent])
+
+  // Preserve ?subdomain on internal navigation when using query-param mode (not hostname mode)
+  useEffect(() => {
+    if (!subdomainFromQuery || isEditMode) return
+
+    const handleClick = (e: MouseEvent) => {
+      const anchor = (e.target as HTMLElement).closest<HTMLAnchorElement>('a')
+      if (!anchor || anchor.target === '_blank' || e.defaultPrevented) return
+
+      const href = anchor.getAttribute('href')
+      if (!href || /^(https?:|mailto:|tel:|#)/.test(href)) return
+
+      const url = new URL(href, window.location.origin)
+      if (url.searchParams.has('subdomain')) return
+
+      e.preventDefault()
+      url.searchParams.set('subdomain', subdomainFromQuery)
+      router.push(url.pathname + url.search)
+    }
+
+    document.addEventListener('click', handleClick, true)
+    return () => document.removeEventListener('click', handleClick, true)
+  }, [subdomainFromQuery, isEditMode, router])
 
   // Edit mode bridge — listeners stay mounted; only tear down when leaving edit mode
   useEffect(() => {

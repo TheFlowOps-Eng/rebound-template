@@ -33,7 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <Suspense>
           <OhhwellsBridge />
-          <PreserveSearchParams />
+          {/* <PreserveSearchParams /> */}
         </Suspense>
         <BrandProvider>
           <TopNav />
