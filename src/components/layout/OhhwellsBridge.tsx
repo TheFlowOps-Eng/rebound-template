@@ -482,6 +482,7 @@ export function OhhwellsBridge() {
           el.innerHTML = html
         })
       }
+      postToParentRef.current({ type: 'ow:hydrate-done' })
     }
 
     window.addEventListener('message', handleHydrate)
