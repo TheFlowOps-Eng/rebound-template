@@ -276,6 +276,8 @@ function StateToggle({
   )
 }
 
+const contentCache = new Map<string, Record<string, string>>()
+
 export function OhhwellsBridge() {
   const pathname = usePathname()
   const router = useRouter()
@@ -345,10 +347,25 @@ export function OhhwellsBridge() {
   activateRef.current = activate
   deactivateRef.current = deactivate
 
-  // Fetch saved content; loader hides when fetch completes (or when no subdomain)
+  // Fetch saved content once per subdomain (cached in module-level Map so remounts are free).
   // In edit mode, hydration comes from the canvas editor via ow:hydrate — skip the public fetch.
   useLayoutEffect(() => {
     if (!subdomain || isEditMode) {
+      setFetchState('done')
+      return
+    }
+
+    const applyContent = (content: Record<string, string>) => {
+      for (const [key, html] of Object.entries(content)) {
+        document.querySelectorAll<HTMLElement>(`[data-ohw-key="${key}"]`).forEach((el) => {
+          if (el.innerHTML !== html) el.innerHTML = html
+        })
+      }
+    }
+
+    const cached = contentCache.get(subdomain)
+    if (cached) {
+      applyContent(cached)
       setFetchState('done')
       return
     }
@@ -359,14 +376,10 @@ export function OhhwellsBridge() {
     fetch(`${apiUrl}/api/public/sites/${subdomain}/content`, { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
-        const content = data?.content as Record<string, string> | undefined
-        if (content) {
-          for (const [key, html] of Object.entries(content)) {
-            document.querySelectorAll<HTMLElement>(`[data-ohw-key="${key}"]`).forEach((el) => {
-              el.innerHTML = html
-            })
-          }
-        }
+        if (cancelled) return
+        const content = (data?.content as Record<string, string>) ?? {}
+        contentCache.set(subdomain, content)
+        applyContent(content)
       })
       .catch(() => {})
       .finally(() => {
@@ -375,6 +388,27 @@ export function OhhwellsBridge() {
 
     return () => { cancelled = true }
   }, [subdomain, isEditMode, pathname])
+
+  // Re-apply cached content whenever new DOM nodes appear (handles Next.js page navigation
+  // where page elements commit after the fetch effect already ran).
+  useEffect(() => {
+    if (!subdomain || isEditMode) return
+
+    const applyFromCache = () => {
+      const content = contentCache.get(subdomain)
+      if (!content) return
+      for (const [key, html] of Object.entries(content)) {
+        document.querySelectorAll<HTMLElement>(`[data-ohw-key="${key}"]`).forEach((el) => {
+          if (el.innerHTML !== html) el.innerHTML = html
+        })
+      }
+    }
+
+    applyFromCache()
+    const observer = new MutationObserver(applyFromCache)
+    observer.observe(document.body, { childList: true, subtree: true })
+    return () => observer.disconnect()
+  }, [subdomain, isEditMode])
 
   // Toggle the layout loader (React-owned DOM — never remove it imperatively)
   useLayoutEffect(() => {
