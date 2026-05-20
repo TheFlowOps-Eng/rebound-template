@@ -493,10 +493,18 @@ export function OhhwellsBridge() {
     }
 
     const handlePaste = (e: ClipboardEvent) => {
-      if (!(e.target as HTMLElement).closest('[data-ohw-editable]')) return
+      const el = (e.target as HTMLElement).closest<HTMLElement>('[data-ohw-editable]')
+      if (!el) return
       e.preventDefault()
       const text = e.clipboardData?.getData('text/plain') ?? ''
-      document.execCommand('insertText', false, text)
+      const maxLen = el.dataset.ohwMaxLength ? parseInt(el.dataset.ohwMaxLength, 10) : null
+      if (maxLen) {
+        const current = el.innerText.replace(/\n$/, '').length
+        const remaining = Math.max(0, maxLen - current)
+        document.execCommand('insertText', false, text.slice(0, remaining))
+      } else {
+        document.execCommand('insertText', false, text)
+      }
     }
 
     const handleInput = (e: Event) => {
@@ -507,7 +515,21 @@ export function OhhwellsBridge() {
       const maxLen = el.dataset.ohwMaxLength ? parseInt(el.dataset.ohwMaxLength, 10) : null
       if (maxLen) {
         const current = el.innerText.replace(/\n$/, '').length
-        setMaxBadge({ rect: el.getBoundingClientRect(), current, max: maxLen })
+        if (current > maxLen) {
+          const sel = window.getSelection()
+          const range = sel?.getRangeAt(0)
+          const offset = range?.startOffset ?? 0
+          el.innerText = el.innerText.replace(/\n$/, '').slice(0, maxLen)
+          const textNode = el.firstChild
+          if (textNode && sel && range) {
+            const newRange = document.createRange()
+            newRange.setStart(textNode, Math.min(offset - (current - maxLen), maxLen))
+            newRange.collapse(true)
+            sel.removeAllRanges()
+            sel.addRange(newRange)
+          }
+        }
+        setMaxBadge({ rect: el.getBoundingClientRect(), current: Math.min(current, maxLen), max: maxLen })
       }
 
       const html = sanitizeHtml(el.innerHTML)
