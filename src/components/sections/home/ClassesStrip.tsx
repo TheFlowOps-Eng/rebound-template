@@ -71,10 +71,12 @@ export function ClassesStrip({ eyebrow, headline, headlineEm, viewAll, items }: 
         className="classes-heading-wrap"
         style={{ textAlign: "center", padding: "0 64px", marginBottom: 72 }}
       >
-        <Eyebrow size="lg" tone="bone">
+        <Eyebrow size="lg" tone="bone" ohwKey="classes-eyebrow">
           {eyebrow}
         </Eyebrow>
         <h2
+          data-ohw-editable="text"
+          data-ohw-key="classes-headline"
           style={{
             fontFamily: "var(--font-display)",
             fontWeight: 400,
@@ -103,9 +105,13 @@ export function ClassesStrip({ eyebrow, headline, headlineEm, viewAll, items }: 
         ))}
       </div>
       <div className="classes-copy" style={{ padding: "44px 0 0" }}>
-        {items.map((c) => (
+        {items.map((c) => {
+          const slug = c.name.toLowerCase().replace(/\s+/g, "-");
+          return (
           <article key={c.name} className="classes-card-copy">
             <h3
+              data-ohw-editable="text"
+              data-ohw-key={`class-${slug}-name`}
               style={{
                 fontFamily: "var(--font-display)",
                 fontWeight: 400,
@@ -119,6 +125,8 @@ export function ClassesStrip({ eyebrow, headline, headlineEm, viewAll, items }: 
               {c.name}
             </h3>
             <p
+              data-ohw-editable="text"
+              data-ohw-key={`class-${slug}-copy`}
               style={{
                 fontFamily: "var(--font-body)",
                 fontWeight: 400,
@@ -135,17 +143,22 @@ export function ClassesStrip({ eyebrow, headline, headlineEm, viewAll, items }: 
               Book {c.name} →
             </InlineCTA>
           </article>
-        ))}
+          );
+        })}
       </div>
 
-      {/* Mobile: stacked cards */}
+      {/* Mobile: stacked cards — same keys as desktop so edits sync */}
       <div className="classes-mobile-stack" style={{ display: "none" }}>
-        {items.map((c) => (
+        {items.map((c) => {
+          const slug = c.name.toLowerCase().replace(/\s+/g, "-");
+          return (
           <article key={c.name} className="classes-card">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={c.img} alt={c.name} className="classes-card-img" />
             <div className="classes-card-copy">
               <h3
+                data-ohw-editable="text"
+                data-ohw-key={`class-${slug}-name`}
                 style={{
                   fontFamily: "var(--font-display)",
                   fontWeight: 400,
@@ -159,6 +172,8 @@ export function ClassesStrip({ eyebrow, headline, headlineEm, viewAll, items }: 
                 {c.name}
               </h3>
               <p
+                data-ohw-editable="text"
+                data-ohw-key={`class-${slug}-copy`}
                 style={{
                   fontFamily: "var(--font-body)",
                   fontWeight: 400,
@@ -175,7 +190,8 @@ export function ClassesStrip({ eyebrow, headline, headlineEm, viewAll, items }: 
               </InlineCTA>
             </div>
           </article>
-        ))}
+          );
+        })}
       </div>
 
       <div className="classes-viewall" style={{ textAlign: "center", marginTop: 72 }}>

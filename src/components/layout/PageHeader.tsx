@@ -2,10 +2,12 @@ export function PageHeader({
   title,
   image,
   height = 320,
+  ohwKey,
 }: {
   title: string;
   image: string;
   height?: number;
+  ohwKey?: string;
 }) {
   return (
     <header
@@ -35,10 +37,11 @@ export function PageHeader({
           alignItems: "center",
           justifyContent: "center",
           paddingTop: 56,
-          pointerEvents: "none",
+          pointerEvents: ohwKey ? "auto" : "none",
         }}
       >
         <h1
+          {...(ohwKey ? { 'data-ohw-editable': 'text', 'data-ohw-key': ohwKey } : {})}
           style={{
             fontFamily: "var(--font-display)",
             fontWeight: 400,
@@ -48,7 +51,7 @@ export function PageHeader({
             color: "var(--bone)",
             margin: 0,
             textShadow: "0 2px 24px rgba(28,12,4,0.18)",
-            userSelect: "none",
+            userSelect: ohwKey ? "auto" : "none",
           }}
         >
           {title}

@@ -20,7 +20,6 @@ type Props = {
  */
 export function ClassLibrary({ filters, items }: Props) {
   const [active, setActive] = useState<ClassFilterId>("all");
-  const filtered = active === "all" ? items : items.filter((c) => c.tag === active);
 
   const filterStyle = (on: boolean) => ({
     fontFamily: "var(--font-body)",
@@ -87,12 +86,12 @@ export function ClassLibrary({ filters, items }: Props) {
           gap: 64,
         }}
       >
-        {filtered.map((c) => (
+        {items.map((c) => (
           <article
             key={c.id}
             className="cl-card"
             style={{
-              display: "grid",
+              display: active !== "all" && c.tag !== active ? "none" : "grid",
               gridTemplateColumns: "460px 1fr",
               gap: 64,
               alignItems: "center",
@@ -115,11 +114,13 @@ export function ClassLibrary({ filters, items }: Props) {
             />
             <div>
               <div style={{ display: "flex", gap: 20, marginTop: 8 }}>
-                <span style={metaStyle}>{c.min} min</span>
+                <span data-ohw-editable="text" data-ohw-key={`class-${c.id}-min`} style={metaStyle}>{c.min} min</span>
                 <span style={metaStyle}>·</span>
-                <span style={metaStyle}>{c.level}</span>
+                <span data-ohw-editable="text" data-ohw-key={`class-${c.id}-level`} style={metaStyle}>{c.level}</span>
               </div>
               <h2
+                data-ohw-editable="text"
+                data-ohw-key={`class-${c.id}-name`}
                 style={{
                   fontFamily: "var(--font-display)",
                   fontWeight: 400,
@@ -133,6 +134,8 @@ export function ClassLibrary({ filters, items }: Props) {
                 {c.name}
               </h2>
               <p
+                data-ohw-editable="text"
+                data-ohw-key={`class-${c.id}-desc`}
                 style={{
                   fontFamily: "var(--font-body)",
                   fontWeight: 400,

@@ -39,6 +39,8 @@ export function Hero({ headline, headlineEm, subhead, cta, background }: Props) 
         }}
       >
         <h1
+          data-ohw-editable="text"
+          data-ohw-key="hero-headline"
           style={{
             fontFamily: "var(--font-display)",
             fontWeight: 400,
@@ -54,6 +56,8 @@ export function Hero({ headline, headlineEm, subhead, cta, background }: Props) 
           <em style={{ fontStyle: "italic" }}>{headlineEm}</em>
         </h1>
         <p
+          data-ohw-editable="text"
+          data-ohw-key="hero-subhead"
           style={{
             fontFamily: "var(--font-body)",
             fontWeight: 400,

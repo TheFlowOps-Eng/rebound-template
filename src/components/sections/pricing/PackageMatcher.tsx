@@ -29,8 +29,10 @@ export function PackageMatcher({ eyebrow, headline, rows }: Props) {
         }
       `}</style>
       <div style={{ maxWidth: 1280, margin: "0 auto 36px" }}>
-        <Eyebrow size="lg">{eyebrow}</Eyebrow>
+        <Eyebrow size="lg" ohwKey="matcher-eyebrow">{eyebrow}</Eyebrow>
         <h2
+          data-ohw-editable="text"
+          data-ohw-key="matcher-headline"
           style={{
             fontFamily: "var(--font-display)",
             fontWeight: 400,
@@ -56,7 +58,7 @@ export function PackageMatcher({ eyebrow, headline, rows }: Props) {
       >
         {rows.map((r, i) => (
           <div
-            key={r.situation}
+            key={i}
             className="pm-row"
             style={{
               display: "grid",
@@ -69,6 +71,8 @@ export function PackageMatcher({ eyebrow, headline, rows }: Props) {
             }}
           >
             <span
+              data-ohw-editable="text"
+              data-ohw-key={`matcher-${i}-situation`}
               style={{
                 fontFamily: "var(--font-display)",
                 fontWeight: 400,
@@ -81,6 +85,8 @@ export function PackageMatcher({ eyebrow, headline, rows }: Props) {
               {r.situation}
             </span>
             <span
+              data-ohw-editable="text"
+              data-ohw-key={`matcher-${i}-recommendation`}
               style={{
                 fontFamily: "var(--font-body)",
                 fontWeight: 700,

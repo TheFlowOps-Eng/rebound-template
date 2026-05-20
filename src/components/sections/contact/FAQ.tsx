@@ -54,6 +54,8 @@ export function FAQ({ headline, items }: Props) {
       `}</style>
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
         <h2
+          data-ohw-editable="text"
+          data-ohw-key="faq-headline"
           style={{
             fontFamily: "var(--font-display)",
             fontWeight: 400,
@@ -69,9 +71,9 @@ export function FAQ({ headline, items }: Props) {
 
         <div>
           {items.map((it, i) => (
-            <details key={it.q} className="faq-q" open={i === 0 ? false : undefined}>
+            <details key={i} className="faq-q" open={i === 0 ? false : undefined}>
               <summary>
-                <span>{it.q}</span>
+                <span data-ohw-editable="text" data-ohw-key={`faq-${i}-q`}>{it.q}</span>
                 <svg
                   className="faq-chevron"
                   viewBox="0 0 24 24"
@@ -87,7 +89,7 @@ export function FAQ({ headline, items }: Props) {
                   />
                 </svg>
               </summary>
-              <p className="faq-a">{it.a}</p>
+              <p data-ohw-editable="text" data-ohw-key={`faq-${i}-a`} className="faq-a">{it.a}</p>
             </details>
           ))}
         </div>

@@ -46,6 +46,8 @@ export function WaitlistCTA({ eyebrow, headline, headlineEm, body, submitLabel }
       >
         <div>
           <span
+            data-ohw-editable="text"
+            data-ohw-key="waitlist-eyebrow"
             className="waitlist-eyebrow"
             style={{
               fontFamily: "var(--font-body)",
@@ -61,6 +63,8 @@ export function WaitlistCTA({ eyebrow, headline, headlineEm, body, submitLabel }
             {eyebrow}
           </span>
           <h2
+            data-ohw-editable="text"
+            data-ohw-key="waitlist-headline"
             style={{
               fontFamily: "var(--font-display)",
               fontWeight: 400,
@@ -75,6 +79,8 @@ export function WaitlistCTA({ eyebrow, headline, headlineEm, body, submitLabel }
             <em style={{ fontStyle: "italic" }}>{headlineEm}</em>.
           </h2>
           <p
+            data-ohw-editable="text"
+            data-ohw-key="waitlist-body"
             className="waitlist-body"
             style={{
               fontFamily: "var(--font-body)",
@@ -92,14 +98,15 @@ export function WaitlistCTA({ eyebrow, headline, headlineEm, body, submitLabel }
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
           <div className="waitlist-form-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
-            <Input label="Full name" placeholder="Full name" onCream={false} />
-            <Input label="Email" placeholder="you@email.com" type="email" onCream={false} />
+            <Input label="Full name" placeholder="Full name" onCream={false} ohwKey="waitlist-label-name" />
+            <Input label="Email" placeholder="you@email.com" type="email" onCream={false} ohwKey="waitlist-label-email" />
           </div>
           <Input
             label="Your message"
             placeholder="Tell us what you’re hoping for..."
             multiline
             onCream={false}
+            ohwKey="waitlist-label-message"
           />
           <div style={{ marginTop: 8 }}>
             <Button variant="inverse" size="md">

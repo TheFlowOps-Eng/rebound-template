@@ -42,8 +42,10 @@ export function MonthlyMemberships({
         className="pm-heading"
         style={{ textAlign: "center", maxWidth: 720, margin: "0 auto 64px" }}
       >
-        <Eyebrow size="lg">{eyebrow}</Eyebrow>
+        <Eyebrow size="lg" ohwKey="memberships-eyebrow">{eyebrow}</Eyebrow>
         <h2
+          data-ohw-editable="text"
+          data-ohw-key="memberships-headline"
           style={{
             fontFamily: "var(--font-display)",
             fontWeight: 400,
@@ -57,6 +59,8 @@ export function MonthlyMemberships({
           {headline}
         </h2>
         <p
+          data-ohw-editable="text"
+          data-ohw-key="memberships-body"
           style={{
             fontFamily: "var(--font-body)",
             fontWeight: 400,
@@ -91,7 +95,9 @@ export function MonthlyMemberships({
             flexDirection: "column",
           }}
         >
-          {tiers.map((t, i) => (
+          {tiers.map((t, i) => {
+            const slug = t.name.toLowerCase().replace(/\s+/g, "-");
+            return (
             <div
               key={t.name}
               className="pm-tier"
@@ -107,6 +113,8 @@ export function MonthlyMemberships({
               <div>
                 <h3
                   className="pm-tier-name"
+                  data-ohw-editable="text"
+                  data-ohw-key={`tier-${slug}-name`}
                   style={{
                     fontFamily: "var(--font-display)",
                     fontWeight: 400,
@@ -120,6 +128,8 @@ export function MonthlyMemberships({
                   {t.name}
                 </h3>
                 <p
+                  data-ohw-editable="text"
+                  data-ohw-key={`tier-${slug}-tagline`}
                   style={{
                     fontFamily: "var(--font-body)",
                     fontStyle: "italic",
@@ -135,6 +145,8 @@ export function MonthlyMemberships({
               <div className="pm-tier-right" style={{ textAlign: "right" }}>
                 <div
                   className="pm-tier-price"
+                  data-ohw-editable="text"
+                  data-ohw-key={`tier-${slug}-price`}
                   style={{
                     fontFamily: "var(--font-display)",
                     fontWeight: 400,
@@ -148,6 +160,8 @@ export function MonthlyMemberships({
                   {t.price}
                 </div>
                 <div
+                  data-ohw-editable="text"
+                  data-ohw-key={`tier-${slug}-unit`}
                   style={{
                     fontFamily: "var(--font-body)",
                     fontSize: 13,
@@ -159,6 +173,8 @@ export function MonthlyMemberships({
                 </div>
                 {t.perClass && (
                   <div
+                    data-ohw-editable="text"
+                    data-ohw-key={`tier-${slug}-per-class`}
                     style={{
                       fontFamily: "var(--font-body)",
                       fontSize: 13,
@@ -172,7 +188,8 @@ export function MonthlyMemberships({
                 )}
               </div>
             </div>
-          ))}
+            );
+          })}
 
           <div style={{ marginTop: 36 }}>
             <Button variant="primary" size="md" href={primaryCta.href}>
@@ -196,6 +213,8 @@ export function MonthlyMemberships({
           }}
         >
           <span
+            data-ohw-editable="text"
+            data-ohw-key="benefits-eyebrow"
             style={{
               fontFamily: "var(--font-body)",
               fontWeight: 700,
@@ -209,6 +228,8 @@ export function MonthlyMemberships({
             {benefits.eyebrow}:
           </span>
           <h3
+            data-ohw-editable="text"
+            data-ohw-key="benefits-headline"
             style={{
               fontFamily: "var(--font-display)",
               fontWeight: 400,
@@ -223,9 +244,9 @@ export function MonthlyMemberships({
             {benefits.headline}
           </h3>
           <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 14 }}>
-            {benefits.items.map((b) => (
+            {benefits.items.map((b, bi) => (
               <li
-                key={b}
+                key={bi}
                 style={{
                   fontFamily: "var(--font-body)",
                   fontSize: 15,
@@ -236,7 +257,10 @@ export function MonthlyMemberships({
                 }}
               >
                 <span aria-hidden="true" style={{ opacity: 0.9 }}>✓</span>
-                <span>{b}</span>
+                <span
+                  data-ohw-editable="text"
+                  data-ohw-key={`benefit-${bi}`}
+                >{b}</span>
               </li>
             ))}
           </ul>

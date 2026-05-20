@@ -22,8 +22,10 @@ export function FreeClassCTA({ eyebrow, headline, headlineEm, body, cta }: Props
         }
       `}</style>
       <div style={{ maxWidth: 760, margin: "0 auto" }}>
-        <Eyebrow size="lg">{eyebrow}</Eyebrow>
+        <Eyebrow size="lg" ohwKey="pricing-free-eyebrow">{eyebrow}</Eyebrow>
         <h2
+          data-ohw-editable="text"
+          data-ohw-key="pricing-free-headline"
           style={{
             fontFamily: "var(--font-display)",
             fontWeight: 400,
@@ -38,6 +40,8 @@ export function FreeClassCTA({ eyebrow, headline, headlineEm, body, cta }: Props
           <em style={{ fontStyle: "italic" }}>{headlineEm}</em>
         </h2>
         <p
+          data-ohw-editable="text"
+          data-ohw-key="pricing-free-body"
           style={{
             fontFamily: "var(--font-body)",
             fontWeight: 400,

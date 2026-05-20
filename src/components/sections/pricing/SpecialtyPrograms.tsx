@@ -24,8 +24,10 @@ export function SpecialtyPrograms({ eyebrow, headline, body, cards, cta }: Props
         }
       `}</style>
       <div style={{ maxWidth: 760, margin: "0 auto 48px" }}>
-        <Eyebrow size="lg">{eyebrow}</Eyebrow>
+        <Eyebrow size="lg" ohwKey="specialty-eyebrow">{eyebrow}</Eyebrow>
         <h2
+          data-ohw-editable="text"
+          data-ohw-key="specialty-headline"
           style={{
             fontFamily: "var(--font-display)",
             fontWeight: 400,
@@ -39,6 +41,8 @@ export function SpecialtyPrograms({ eyebrow, headline, body, cards, cta }: Props
           {headline}
         </h2>
         <p
+          data-ohw-editable="text"
+          data-ohw-key="specialty-body"
           style={{
             fontFamily: "var(--font-body)",
             fontWeight: 400,
@@ -66,7 +70,7 @@ export function SpecialtyPrograms({ eyebrow, headline, body, cards, cta }: Props
           textAlign: "left",
         }}
       >
-        {cards.map((c) => (
+        {cards.map((c, i) => (
           <article
             key={c.title}
             className="ps-card"
@@ -79,6 +83,8 @@ export function SpecialtyPrograms({ eyebrow, headline, body, cards, cta }: Props
             }}
           >
             <h3
+              data-ohw-editable="text"
+              data-ohw-key={`specialty-${i}-title`}
               style={{
                 fontFamily: "var(--font-display)",
                 fontWeight: 400,
@@ -92,6 +98,8 @@ export function SpecialtyPrograms({ eyebrow, headline, body, cards, cta }: Props
               {c.title}
             </h3>
             <span
+              data-ohw-editable="text"
+              data-ohw-key={`specialty-${i}-price`}
               style={{
                 fontFamily: "var(--font-display)",
                 fontStyle: "italic",
@@ -103,6 +111,8 @@ export function SpecialtyPrograms({ eyebrow, headline, body, cards, cta }: Props
               {c.price}
             </span>
             <p
+              data-ohw-editable="text"
+              data-ohw-key={`specialty-${i}-body`}
               style={{
                 fontFamily: "var(--font-body)",
                 fontSize: 15,

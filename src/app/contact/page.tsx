@@ -16,7 +16,7 @@ export const metadata = buildMetadata({
 export default function ContactPage() {
   return (
     <>
-      <PageHeader {...contactContent.header} />
+      <PageHeader {...contactContent.header} ohwKey="contact-page-title" />
       <HelloHero {...contactContent.hello} />
       <section
         className="contact-form-section"

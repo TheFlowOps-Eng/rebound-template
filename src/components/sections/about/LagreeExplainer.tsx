@@ -38,6 +38,8 @@ export function LagreeExplainer({ headline, headlineEm, body, image, cards, cta 
       >
         <div style={{ display: "flex", flexDirection: "column", gap: 56 }}>
           <h2
+            data-ohw-editable="text"
+            data-ohw-key="explainer-headline"
             style={{
               fontFamily: "var(--font-display)",
               fontWeight: 400,
@@ -52,6 +54,8 @@ export function LagreeExplainer({ headline, headlineEm, body, image, cards, cta 
             <em style={{ fontStyle: "italic" }}>{headlineEm}</em>; though they share a family resemblance.
           </h2>
           <p
+            data-ohw-editable="text"
+            data-ohw-key="explainer-body"
             className="explainer-body"
             style={{
               fontFamily: "var(--font-body)",
@@ -92,6 +96,8 @@ export function LagreeExplainer({ headline, headlineEm, body, image, cards, cta 
               }}
             >
               <span
+                data-ohw-editable="text"
+                data-ohw-key={`explainer-card-${i}-label`}
                 className="explainer-card-label"
                 style={{
                   fontFamily: "var(--font-body)",
@@ -105,6 +111,8 @@ export function LagreeExplainer({ headline, headlineEm, body, image, cards, cta 
                 {c.label}
               </span>
               <p
+                data-ohw-editable="text"
+                data-ohw-key={`explainer-card-${i}-body`}
                 className="explainer-card-body"
                 style={{
                   fontFamily: "var(--font-body)",

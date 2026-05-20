@@ -35,8 +35,10 @@ export function HelloHero({ eyebrow, headline, headlineEm, body, channels }: Pro
           textAlign: "center",
         }}
       >
-        <Eyebrow size="lg">{eyebrow}</Eyebrow>
+        <Eyebrow size="lg" ohwKey="hello-eyebrow">{eyebrow}</Eyebrow>
         <h2
+          data-ohw-editable="text"
+          data-ohw-key="hello-headline"
           style={{
             fontFamily: "var(--font-display)",
             fontWeight: 400,
@@ -51,6 +53,8 @@ export function HelloHero({ eyebrow, headline, headlineEm, body, channels }: Pro
           <em style={{ fontStyle: "italic" }}>{headlineEm}</em>
         </h2>
         <p
+          data-ohw-editable="text"
+          data-ohw-key="hello-body"
           style={{
             fontFamily: "var(--font-body)",
             fontSize: 17,
@@ -89,6 +93,8 @@ export function HelloHero({ eyebrow, headline, headlineEm, body, channels }: Pro
             }}
           >
             <span
+              data-ohw-editable="text"
+              data-ohw-key={`hello-channel-${c.label.toLowerCase().replace(/\s+/g, '-')}-label`}
               style={{
                 fontFamily: "var(--font-body)",
                 fontWeight: 700,
@@ -103,6 +109,8 @@ export function HelloHero({ eyebrow, headline, headlineEm, body, channels }: Pro
             {c.href ? (
               <a
                 href={c.href}
+                data-ohw-editable="text"
+                data-ohw-key={`hello-channel-${c.label.toLowerCase().replace(/\s+/g, '-')}-value`}
                 style={{
                   fontFamily: "var(--font-body)",
                   fontSize: 15,
@@ -115,6 +123,8 @@ export function HelloHero({ eyebrow, headline, headlineEm, body, channels }: Pro
               </a>
             ) : (
               <span
+                data-ohw-editable="text"
+                data-ohw-key={`hello-channel-${c.label.toLowerCase().replace(/\s+/g, '-')}-value`}
                 style={{
                   fontFamily: "var(--font-body)",
                   fontSize: 15,

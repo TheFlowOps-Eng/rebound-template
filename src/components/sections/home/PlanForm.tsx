@@ -52,8 +52,10 @@ export function PlanForm({ eyebrow, headline, headlineEm, body, submitLabel }: P
         }}
       >
         <div>
-          <Eyebrow size="lg">{eyebrow}</Eyebrow>
+          <Eyebrow size="lg" ohwKey="plan-eyebrow">{eyebrow}</Eyebrow>
           <h2
+            data-ohw-editable="text"
+            data-ohw-key="plan-headline"
             style={{
               fontFamily: "var(--font-display)",
               fontWeight: 400,
@@ -68,6 +70,8 @@ export function PlanForm({ eyebrow, headline, headlineEm, body, submitLabel }: P
             <em style={{ fontStyle: "italic" }}>{headlineEm}</em>
           </h2>
           <p
+            data-ohw-editable="text"
+            data-ohw-key="plan-body"
             style={{
               fontFamily: "var(--font-body)",
               fontWeight: 400,
@@ -88,15 +92,15 @@ export function PlanForm({ eyebrow, headline, headlineEm, body, submitLabel }: P
           onSubmit={(e) => e.preventDefault()}
         >
           <div>
-            <label style={fieldLabelStyle} htmlFor="rb-name">Full name</label>
+            <label data-ohw-editable="text" data-ohw-key="plan-label-name" style={fieldLabelStyle} htmlFor="rb-name">Full name</label>
             <input id="rb-name" type="text" style={inputStyle} />
           </div>
           <div>
-            <label style={fieldLabelStyle} htmlFor="rb-email">Email</label>
+            <label data-ohw-editable="text" data-ohw-key="plan-label-email" style={fieldLabelStyle} htmlFor="rb-email">Email</label>
             <input id="rb-email" type="email" style={inputStyle} />
           </div>
           <div style={{ gridColumn: "1 / -1" }}>
-            <label style={fieldLabelStyle} htmlFor="rb-msg">Your Message</label>
+            <label data-ohw-editable="text" data-ohw-key="plan-label-message" style={fieldLabelStyle} htmlFor="rb-msg">Your Message</label>
             <textarea
               id="rb-msg"
               style={{ ...inputStyle, minHeight: 150, resize: "vertical" }}

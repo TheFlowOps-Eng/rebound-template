@@ -26,10 +26,12 @@ export function StudioFeatures({ eyebrow, headline, items }: Props) {
         }
       `}</style>
       <div style={{ maxWidth: 760, margin: "0 auto 64px", textAlign: "center" }}>
-        <Eyebrow size="lg" tone="bone">
+        <Eyebrow size="lg" tone="bone" ohwKey="features-eyebrow">
           {eyebrow}
         </Eyebrow>
         <h2
+          data-ohw-editable="text"
+          data-ohw-key="features-headline"
           style={{
             fontFamily: "var(--font-display)",
             fontWeight: 400,
@@ -54,9 +56,11 @@ export function StudioFeatures({ eyebrow, headline, items }: Props) {
           gap: "48px 56px",
         }}
       >
-        {items.map((it) => (
+        {items.map((it, i) => (
           <article key={it.title} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <h3
+              data-ohw-editable="text"
+              data-ohw-key={`feature-${i}-title`}
               style={{
                 fontFamily: "var(--font-display)",
                 fontWeight: 400,
@@ -74,6 +78,8 @@ export function StudioFeatures({ eyebrow, headline, items }: Props) {
               style={{ width: 36, height: 1, background: "rgba(255,255,255,.55)", margin: "4px 0" }}
             />
             <p
+              data-ohw-editable="text"
+              data-ohw-key={`feature-${i}-body`}
               style={{
                 fontFamily: "var(--font-body)",
                 fontSize: 15,

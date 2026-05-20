@@ -10,6 +10,8 @@ export function Manifesto({ headline, primaryCta, secondaryCta, strip }: Props) 
     <section style={{ background: "var(--stone)", padding: "120px 0 110px", overflow: "hidden" }}>
       <div style={{ maxWidth: 1280, margin: "0 auto", textAlign: "center", padding: "0 64px" }}>
         <h2
+          data-ohw-editable="text"
+          data-ohw-key="manifesto-headline"
           style={{
             fontFamily: "var(--font-display)",
             fontWeight: 400,

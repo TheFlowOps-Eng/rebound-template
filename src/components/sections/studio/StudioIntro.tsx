@@ -34,8 +34,10 @@ export function StudioIntro({ eyebrow, headline, headlineEm, paragraphs }: Props
         }}
       >
         <div>
-          <Eyebrow size="lg">{eyebrow}</Eyebrow>
+          <Eyebrow size="lg" ohwKey="studio-intro-eyebrow">{eyebrow}</Eyebrow>
           <h2
+            data-ohw-editable="text"
+            data-ohw-key="studio-intro-headline"
             style={{
               fontFamily: "var(--font-display)",
               fontWeight: 400,
@@ -55,6 +57,8 @@ export function StudioIntro({ eyebrow, headline, headlineEm, paragraphs }: Props
           {paragraphs.map((p, i) => (
             <p
               key={i}
+              data-ohw-editable="text"
+              data-ohw-key={`studio-intro-para-${i}`}
               style={{
                 fontFamily: "var(--font-body)",
                 fontWeight: 400,
