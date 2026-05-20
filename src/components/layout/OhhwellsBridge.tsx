@@ -278,8 +278,14 @@ function StateToggle({
 export function OhhwellsBridge() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const subdomain = searchParams.get('subdomain') ?? ''
   const isEditMode = isEditSessionActive()
+
+  const subdomain = searchParams.get('subdomain') ?? (() => {
+    if (typeof window === 'undefined') return ''
+    const parts = window.location.hostname.split('.')
+    // e.g. rebound-local-vl5l.ohhwells.site → ['rebound-local-vl5l', 'ohhwells', 'site']
+    return parts.length >= 3 && parts[0] !== 'www' ? parts[0] : ''
+  })()
 
   const postToParent = useCallback((data: Record<string, unknown>) => {
     if (typeof window !== 'undefined' && window.parent !== window) {
@@ -291,6 +297,7 @@ export function OhhwellsBridge() {
   const autoSaveTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map())
 
   const activeElRef = useRef<HTMLElement | null>(null)
+  const originalContentRef = useRef<string | null>(null)
   const hoverCardRef = useRef<HTMLElement | null>(null)
   const editStylesRef = useRef<{ base: HTMLStyleElement; forceHover: HTMLStyleElement } | null>(null)
   const activateRef = useRef<(el: HTMLElement) => void>(() => {})
@@ -327,6 +334,7 @@ export function OhhwellsBridge() {
     el.removeAttribute('data-ohw-hovered')
     el.focus()
     activeElRef.current = el
+    originalContentRef.current = el.innerHTML
     setToolbarRect(el.getBoundingClientRect())
     postToParent({ type: 'ow:enter-edit', key: el.dataset.ohwKey })
   }, [deactivate, postToParent])
@@ -561,7 +569,16 @@ export function OhhwellsBridge() {
     window.addEventListener('message', handleHydrate)
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') deactivateRef.current()
+      if (e.key !== 'Escape') return
+      const el = activeElRef.current
+      if (el && originalContentRef.current !== null) {
+        el.innerHTML = originalContentRef.current
+        const key = el.dataset.ohwKey
+        if (key) {
+          postToParentRef.current({ type: 'ow:change', nodes: [{ key, text: originalContentRef.current }] })
+        }
+      }
+      deactivateRef.current()
     }
 
     const handleScroll = () => {

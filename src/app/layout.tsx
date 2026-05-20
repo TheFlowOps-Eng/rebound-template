@@ -28,7 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </div>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{if(!new URLSearchParams(location.search).get("subdomain"))return;var e=document.getElementById("ohw-loader");if(e)e.style.display="flex"}catch(e){}})();`,
+            __html: `(function(){try{var p=location.hostname.split(".");var fromHost=p.length>=3&&p[0]!=="www"?p[0]:"";var fromQuery=new URLSearchParams(location.search).get("subdomain")||"";if(!fromHost&&!fromQuery)return;var e=document.getElementById("ohw-loader");if(e)e.style.display="flex"}catch(e){}})();`,
           }}
         />
         <Suspense>
