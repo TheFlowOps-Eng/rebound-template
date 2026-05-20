@@ -90,6 +90,26 @@ const TOOLBAR_GROUPS: Array<Array<{ cmd: string; title: string }>> = [
   ],
 ]
 
+function GlowFrame({ rect }: { rect: DOMRect }) {
+  const GAP = 4
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        top: rect.top - GAP,
+        left: rect.left - GAP,
+        width: rect.width + GAP * 2,
+        height: rect.height + GAP * 2,
+        border: '2px solid #0885FE',
+        borderRadius: 8,
+        boxShadow: '0 0 0 4px rgba(8, 133, 254, 0.12)',
+        pointerEvents: 'none',
+        zIndex: 2147483646,
+      }}
+    />
+  )
+}
+
 function FloatingToolbar({
   rect,
   onCommand,
@@ -157,6 +177,8 @@ function FloatingToolbar({
                   color: isActive ? '#0885FE' : '#1C1917',
                   flexShrink: 0,
                   padding: 6,
+                  outline: isActive ? '1.5px solid #0885FE' : 'none',
+                  outlineOffset: 2,
                 }}
               >
                 <svg
@@ -379,10 +401,7 @@ export function OhhwellsBridge() {
         border-radius: 2px;
       }
       [data-ohw-editable][contenteditable] {
-        outline: 2px solid #0885FE !important;
-        outline-offset: 4px;
-        border-radius: 2px;
-        box-shadow: 0 0 0 4px rgba(8,133,254,0.12) !important;
+        outline: none !important;
         caret-color: #0885FE;
       }
       [data-ohw-editable][contenteditable]::selection,
@@ -643,7 +662,10 @@ export function OhhwellsBridge() {
   return (
     <>
       {toolbarRect && createPortal(
-        <FloatingToolbar rect={toolbarRect} onCommand={handleCommand} activeCommands={activeCommands} />,
+        <>
+          <GlowFrame rect={toolbarRect} />
+          <FloatingToolbar rect={toolbarRect} onCommand={handleCommand} activeCommands={activeCommands} />
+        </>,
         document.body,
       )}
       {maxBadge && createPortal(
