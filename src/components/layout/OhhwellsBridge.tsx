@@ -449,11 +449,7 @@ export function OhhwellsBridge() {
       }
 
       const anchor = target.closest('a')
-      if (anchor) {
-        const href = anchor.getAttribute('href') ?? ''
-        const isExternal = /^https?:\/\//.test(href) && !href.startsWith(window.location.origin)
-        if (isExternal) e.preventDefault()
-      }
+      if (anchor) e.preventDefault()
 
       deactivateRef.current()
     }
