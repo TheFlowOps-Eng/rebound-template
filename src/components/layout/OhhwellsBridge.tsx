@@ -5,6 +5,7 @@ import { usePathname, useSearchParams } from 'next/navigation'
 import { isEditSessionActive } from '@/lib/ohw-session-search'
 type EditableNode = { key: string; type: string; text: string }
 
+
 function collectEditableNodes(): EditableNode[] {
   return Array.from(document.querySelectorAll<HTMLElement>('[data-ohw-editable]')).map((el) => ({
     key: el.dataset.ohwKey ?? '',
@@ -371,7 +372,7 @@ export function OhhwellsBridge() {
       })
 
     return () => { cancelled = true }
-  }, [subdomain, isEditMode])
+  }, [subdomain, isEditMode, pathname])
 
   // Toggle the layout loader (React-owned DOM — never remove it imperatively)
   useLayoutEffect(() => {
