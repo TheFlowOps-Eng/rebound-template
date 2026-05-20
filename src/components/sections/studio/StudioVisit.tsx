@@ -35,8 +35,10 @@ export function StudioVisit({ eyebrow, headline, address, hours, cta }: Props) {
         }}
       >
         <div>
-          <Eyebrow size="lg">{eyebrow}</Eyebrow>
+          <Eyebrow size="lg" ohwKey="visit-eyebrow">{eyebrow}</Eyebrow>
           <h2
+            data-ohw-editable="text"
+            data-ohw-key="visit-headline"
             style={{
               fontFamily: "var(--font-display)",
               fontWeight: 400,
@@ -57,6 +59,8 @@ export function StudioVisit({ eyebrow, headline, address, hours, cta }: Props) {
         <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
           <div>
             <span
+              data-ohw-editable="text"
+              data-ohw-key="visit-label-address"
               style={{
                 fontFamily: "var(--font-body)",
                 fontWeight: 700,
@@ -70,9 +74,11 @@ export function StudioVisit({ eyebrow, headline, address, hours, cta }: Props) {
             >
               Address
             </span>
-            {address.map((line) => (
+            {address.map((line, i) => (
               <div
-                key={line}
+                key={i}
+                data-ohw-editable="text"
+                data-ohw-key={`visit-address-${i}`}
                 style={{
                   fontFamily: "var(--font-body)",
                   fontSize: 17,
@@ -87,6 +93,8 @@ export function StudioVisit({ eyebrow, headline, address, hours, cta }: Props) {
 
           <div>
             <span
+              data-ohw-editable="text"
+              data-ohw-key="visit-label-hours"
               style={{
                 fontFamily: "var(--font-body)",
                 fontWeight: 700,
@@ -100,9 +108,9 @@ export function StudioVisit({ eyebrow, headline, address, hours, cta }: Props) {
             >
               Hours
             </span>
-            {hours.map((h) => (
+            {hours.map((h, i) => (
               <div
-                key={h.label}
+                key={i}
                 style={{
                   display: "grid",
                   gridTemplateColumns: "120px 1fr",
@@ -114,8 +122,15 @@ export function StudioVisit({ eyebrow, headline, address, hours, cta }: Props) {
                   color: "var(--clove)",
                 }}
               >
-                <span style={{ fontWeight: 700 }}>{h.label}</span>
-                <span>{h.value}</span>
+                <span
+                  data-ohw-editable="text"
+                  data-ohw-key={`visit-hour-${i}-label`}
+                  style={{ fontWeight: 700 }}
+                >{h.label}</span>
+                <span
+                  data-ohw-editable="text"
+                  data-ohw-key={`visit-hour-${i}-value`}
+                >{h.value}</span>
               </div>
             ))}
           </div>

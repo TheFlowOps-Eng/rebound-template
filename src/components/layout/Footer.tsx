@@ -119,13 +119,13 @@ export function Footer() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/assets/rebound-logo-dark.png" alt="Re:Bound" className="rb-footer-logo" />
           <div>
-            <p style={label}>Address:</p>
-            <p style={body}>{f.address}</p>
+            <p data-ohw-editable="text" data-ohw-key="footer-label-address" style={label}>Address:</p>
+            <p data-ohw-editable="text" data-ohw-key="footer-address" style={body}>{f.address}</p>
           </div>
           <div>
-            <p style={label}>Contact:</p>
-            <p style={body}>{f.phone}</p>
-            <p style={body}>{f.email}</p>
+            <p data-ohw-editable="text" data-ohw-key="footer-label-contact" style={label}>Contact:</p>
+            <p data-ohw-editable="text" data-ohw-key="footer-phone" style={body}>{f.phone}</p>
+            <p data-ohw-editable="text" data-ohw-key="footer-email" style={body}>{f.email}</p>
           </div>
           <div className="rb-footer-socials">
             {f.socials.map((s) => (
@@ -150,7 +150,7 @@ export function Footer() {
       </div>
 
       <hr className="rb-footer-rule" />
-      <p className="rb-footer-credit">{f.credit}</p>
+      <p data-ohw-editable="text" data-ohw-key="footer-credit" className="rb-footer-credit">{f.credit}</p>
     </footer>
   );
 }

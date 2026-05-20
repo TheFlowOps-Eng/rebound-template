@@ -34,8 +34,10 @@ export function LagreeIntro({ eyebrow, headlineEm, headline, body, cta, image }:
         }}
       >
         <div>
-          <Eyebrow size="lg">{eyebrow}</Eyebrow>
+          <Eyebrow size="lg" ohwKey="lagree-eyebrow">{eyebrow}</Eyebrow>
           <h2
+            data-ohw-editable="text"
+            data-ohw-key="lagree-headline"
             style={{
               fontFamily: "var(--font-display)",
               fontWeight: 400,
@@ -53,6 +55,8 @@ export function LagreeIntro({ eyebrow, headlineEm, headline, body, cta, image }:
           {body.map((p, i) => (
             <p
               key={i}
+              data-ohw-editable="text"
+              data-ohw-key={`lagree-body-${i}`}
               style={{
                 fontFamily: "var(--font-body)",
                 fontWeight: 400,

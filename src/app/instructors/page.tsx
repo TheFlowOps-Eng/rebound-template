@@ -12,7 +12,7 @@ export const metadata = buildMetadata({
 export default function InstructorsPage() {
   return (
     <>
-      <PageHeader {...instructorsContent.header} />
+      <PageHeader {...instructorsContent.header} ohwKey="instructors-page-title" />
       <InstructorGrid team={instructorsContent.team} />
     </>
   );

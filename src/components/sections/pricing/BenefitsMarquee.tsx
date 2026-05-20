@@ -47,7 +47,12 @@ export function BenefitsMarquee({ items }: Props) {
               whiteSpace: "nowrap",
             }}
           >
-            {t}
+            <span
+              data-ohw-editable="text"
+              data-ohw-key={`marquee-${i % items.length}`}
+            >
+              {t}
+            </span>
             <span style={{ opacity: 0.6 }}>·</span>
           </span>
         ))}

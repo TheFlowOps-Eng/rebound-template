@@ -7,6 +7,7 @@ export function Input({
   multiline = false,
   style,
   onCream = true,
+  ohwKey,
 }: {
   label: string;
   placeholder?: string;
@@ -14,6 +15,7 @@ export function Input({
   multiline?: boolean;
   style?: CSSProperties;
   onCream?: boolean;
+  ohwKey?: string;
 }) {
   const labelColor = onCream ? "var(--clove)" : "var(--bone)";
   const borderColor = onCream ? "var(--ink)" : "var(--bone)";
@@ -33,6 +35,7 @@ export function Input({
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 8, ...style }}>
       <label
+        {...(ohwKey ? { 'data-ohw-editable': 'text', 'data-ohw-key': ohwKey } : {})}
         style={{
           fontFamily: "var(--font-label)",
           fontWeight: 700,

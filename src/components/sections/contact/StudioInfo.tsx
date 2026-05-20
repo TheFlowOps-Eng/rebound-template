@@ -16,9 +16,11 @@ export function StudioInfo({ details }: Props) {
         background: "transparent",
       }}
     >
-      {details.blocks.map((b) => (
+      {details.blocks.map((b, bi) => (
         <div key={b.label} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <span
+            data-ohw-editable="text"
+            data-ohw-key={`studio-block-${bi}-label`}
             style={{
               fontFamily: "var(--font-body)",
               fontWeight: 700,
@@ -30,9 +32,11 @@ export function StudioInfo({ details }: Props) {
           >
             {b.label}:
           </span>
-          {b.lines.map((line) => (
+          {b.lines.map((line, li) => (
             <span
-              key={line}
+              key={li}
+              data-ohw-editable="text"
+              data-ohw-key={`studio-block-${bi}-line-${li}`}
               style={{
                 fontFamily: "var(--font-body)",
                 fontSize: 15,

@@ -17,7 +17,7 @@ export const metadata = buildMetadata({
 export default function PricingPage() {
   return (
     <>
-      <PageHeader {...pricingContent.header} />
+      <PageHeader {...pricingContent.header} ohwKey="pricing-page-title" />
       <FreeClassCTA {...pricingContent.freeClass} />
       <BenefitsMarquee items={pricingContent.marquee} />
       <MonthlyMemberships {...pricingContent.memberships} />

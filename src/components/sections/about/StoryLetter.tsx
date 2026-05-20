@@ -49,6 +49,8 @@ export function StoryLetter({ eyebrow, paragraphs, signature }: Props) {
 
         <div style={{ display: "flex", flexDirection: "column", gap: 24, paddingTop: 8 }}>
           <span
+            data-ohw-editable="text"
+            data-ohw-key="story-eyebrow"
             className="story-letter-eyebrow"
             style={{
               fontFamily: "var(--font-body)",
@@ -64,6 +66,8 @@ export function StoryLetter({ eyebrow, paragraphs, signature }: Props) {
           {paragraphs.map((p, i) => (
             <p
               key={i}
+              data-ohw-editable="text"
+              data-ohw-key={`story-para-${i}`}
               className="story-letter-p"
               style={{
                 fontFamily: "var(--font-body)",
@@ -78,6 +82,8 @@ export function StoryLetter({ eyebrow, paragraphs, signature }: Props) {
             </p>
           ))}
           <div
+            data-ohw-editable="text"
+            data-ohw-key="story-signature-script"
             className="story-letter-script"
             style={{
               fontFamily: "var(--font-display)",
@@ -91,6 +97,8 @@ export function StoryLetter({ eyebrow, paragraphs, signature }: Props) {
             {signature.script}
           </div>
           <div
+            data-ohw-editable="text"
+            data-ohw-key="story-signature-name"
             style={{
               fontFamily: "var(--font-body)",
               fontWeight: 700,

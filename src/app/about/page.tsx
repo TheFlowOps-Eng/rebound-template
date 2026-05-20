@@ -15,7 +15,7 @@ export const metadata = buildMetadata({
 export default function AboutPage() {
   return (
     <>
-      <PageHeader {...aboutContent.header} />
+      <PageHeader {...aboutContent.header} ohwKey="about-page-title" />
       <StoryLetter {...aboutContent.story} />
       <Manifesto {...aboutContent.manifesto} />
       <LagreeExplainer {...aboutContent.explainer} />

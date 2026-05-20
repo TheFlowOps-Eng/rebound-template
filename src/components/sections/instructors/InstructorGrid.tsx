@@ -235,37 +235,59 @@ export function InstructorGrid({ team }: Props) {
 
 function Card({ p }: { p: Instructor }) {
   const formats = p.formats ?? [];
+  const slug = p.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
   return (
-    <article className="ig-card" tabIndex={0} aria-label={p.name}>
+    <article className="ig-card" data-ohw-hover-card="" tabIndex={0} aria-label={p.name}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img className="ig-img" src={p.img} alt={p.name} />
-      <h2 className="ig-name">{p.name}</h2>
+      <h2 className="ig-name" data-ohw-editable="text" data-ohw-key={`${slug}-name`}>{p.name}</h2>
 
       <div className="ig-panel">
-        <h3 className="ig-pname">{p.name}</h3>
+        <h3
+          className="ig-pname"
+          data-ohw-editable="text"
+          data-ohw-key={`${slug}-name`}
+        >{p.name}</h3>
 
         {p.certification && p.certification.length > 0 && (
           <>
-            <span className="ig-label">Certification</span>
-            <p className="ig-cert">{p.certification.join(" · ")}</p>
+            <span className="ig-label" data-ohw-editable="text" data-ohw-key={`${slug}-cert-label`}>Certification</span>
+            <p
+              className="ig-cert"
+              data-ohw-editable="text"
+              data-ohw-key={`${slug}-cert`}
+            >{p.certification.join(" · ")}</p>
           </>
         )}
 
-        {p.quote && <p className="ig-quote">“{p.quote}”</p>}
+        {p.quote && (
+          <p
+            className="ig-quote"
+            data-ohw-editable="text"
+            data-ohw-key={`${slug}-quote`}
+          >{'"'}{p.quote}{'"'}</p>
+        )}
 
         {p.style && (
           <>
-            <span className="ig-label">Style</span>
-            <p className="ig-style">{p.style}</p>
+            <span className="ig-label" data-ohw-editable="text" data-ohw-key={`${slug}-style-label`}>Style</span>
+            <p
+              className="ig-style"
+              data-ohw-editable="text"
+              data-ohw-key={`${slug}-style`}
+            >{p.style}</p>
           </>
         )}
 
         {formats.length > 0 && (
           <div className="ig-formats">
-            {formats.map((f) => (
-              <span key={f} className="ig-chip">
-                {f}
-              </span>
+            {formats.map((f, i) => (
+              <span
+                key={f}
+                className="ig-chip"
+                data-ohw-editable="text"
+                data-ohw-key={`${slug}-format-${i}`}
+              >{f}</span>
             ))}
           </div>
         )}

@@ -105,45 +105,53 @@ export function Testimonials({ items, primaryCta, secondaryCta, background }: Pr
             “
           </span>
         </div>
-        <p
-          style={{
-            fontFamily: "var(--font-display)",
-            fontWeight: 400,
-            fontSize: 46,
-            lineHeight: 1.25,
-            letterSpacing: "-0.01em",
-            margin: 0,
-            color: "var(--bone)",
-          }}
-        >
-          {t.quote}
-        </p>
-        <p
-          style={{
-            fontFamily: "var(--font-body)",
-            fontWeight: 700,
-            fontSize: 13,
-            letterSpacing: ".18em",
-            textTransform: "uppercase",
-            color: "var(--bone)",
-            margin: "44px 0 40px",
-          }}
-        >
-          {t.name},
-          <span
-            style={{
-              fontStyle: "italic",
-              fontWeight: 400,
-              textTransform: "none",
-              letterSpacing: ".05em",
-              fontFamily: "var(--font-display)",
-              fontSize: 18,
-              marginLeft: 6,
-            }}
-          >
-            {t.role}
-          </span>
-        </p>
+        {items.map((item, i) => (
+          <div key={i} style={i !== tIdx ? { display: "none" } : undefined}>
+            <p
+              data-ohw-editable="text"
+              data-ohw-key={`testimonial-${i}-quote`}
+              style={{
+                fontFamily: "var(--font-display)",
+                fontWeight: 400,
+                fontSize: 46,
+                lineHeight: 1.25,
+                letterSpacing: "-0.01em",
+                margin: 0,
+                color: "var(--bone)",
+              }}
+            >
+              {item.quote}
+            </p>
+            <p
+              data-ohw-editable="text"
+              data-ohw-key={`testimonial-${i}-attribution`}
+              style={{
+                fontFamily: "var(--font-body)",
+                fontWeight: 700,
+                fontSize: 13,
+                letterSpacing: ".18em",
+                textTransform: "uppercase",
+                color: "var(--bone)",
+                margin: "44px 0 40px",
+              }}
+            >
+              {item.name},
+              <span
+                style={{
+                  fontStyle: "italic",
+                  fontWeight: 400,
+                  textTransform: "none",
+                  letterSpacing: ".05em",
+                  fontFamily: "var(--font-display)",
+                  fontSize: 18,
+                  marginLeft: 6,
+                }}
+              >
+                {item.role}
+              </span>
+            </p>
+          </div>
+        ))}
         <div style={{ display: "inline-flex", gap: 0, marginTop: 8 }}>
           <Button variant="primary" size="md" href={primaryCta.href}>
             {primaryCta.label}
