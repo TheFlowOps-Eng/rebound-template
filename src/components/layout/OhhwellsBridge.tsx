@@ -34,6 +34,28 @@ function collectHoverRules(): string {
   return lines.join('\n')
 }
 
+const SAFE_TAGS = new Set([
+  'B', 'I', 'U', 'S', 'STRIKE', 'STRONG', 'EM', 'BR', 'P', 'DIV', 'SPAN', 'OL', 'UL', 'LI',
+])
+
+function sanitizeHtml(html: string): string {
+  const doc = new DOMParser().parseFromString(`<body>${html}</body>`, 'text/html')
+  function walk(parent: Element) {
+    for (const child of Array.from(parent.childNodes)) {
+      if (child.nodeType !== Node.ELEMENT_NODE) continue
+      const el = child as Element
+      if (!SAFE_TAGS.has(el.tagName)) {
+        parent.replaceChild(document.createTextNode(el.textContent ?? ''), el)
+      } else {
+        for (const attr of Array.from(el.attributes)) el.removeAttribute(attr.name)
+        walk(el)
+      }
+    }
+  }
+  walk(doc.body)
+  return doc.body.innerHTML
+}
+
 const ICONS: Record<string, string> = {
   bold: '<path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/>',
   italic: '<line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/>',
@@ -241,6 +263,7 @@ export function OhhwellsBridge() {
 
   const [toolbarRect, setToolbarRect] = useState<DOMRect | null>(null)
   const [toggleState, setToggleState] = useState<{ rect: DOMRect; isLocked: boolean } | null>(null)
+  const [maxBadge, setMaxBadge] = useState<{ rect: DOMRect; current: number; max: number } | null>(null)
 
   const refreshForceHoverRules = useCallback(() => {
     editStylesRef.current?.forceHover &&
@@ -253,6 +276,7 @@ export function OhhwellsBridge() {
     el.removeAttribute('contenteditable')
     activeElRef.current = null
     setToolbarRect(null)
+    setMaxBadge(null)
     postToParent({ type: 'ow:exit-edit' })
   }, [postToParent])
 
@@ -356,6 +380,7 @@ export function OhhwellsBridge() {
       const target = e.target as HTMLElement
       if (target.closest('[data-ohw-toolbar]')) return
       if (target.closest('[data-ohw-state-toggle]')) return
+      if (target.closest('[data-ohw-max-badge]')) return
 
       const editable = target.closest<HTMLElement>('[data-ohw-editable]')
       if (editable) {
@@ -416,11 +441,25 @@ export function OhhwellsBridge() {
       }
     }
 
+    const handlePaste = (e: ClipboardEvent) => {
+      if (!(e.target as HTMLElement).closest('[data-ohw-editable]')) return
+      e.preventDefault()
+      const text = e.clipboardData?.getData('text/plain') ?? ''
+      document.execCommand('insertText', false, text)
+    }
+
     const handleInput = (e: Event) => {
       const el = e.target as HTMLElement
       const key = el.dataset.ohwKey
       if (!key) return
-      const html = el.innerHTML
+
+      const maxLen = el.dataset.ohwMaxLength ? parseInt(el.dataset.ohwMaxLength, 10) : null
+      if (maxLen) {
+        const current = el.innerText.replace(/\n$/, '').length
+        setMaxBadge({ rect: el.getBoundingClientRect(), current, max: maxLen })
+      }
+
+      const html = sanitizeHtml(el.innerHTML)
       document.querySelectorAll<HTMLElement>(`[data-ohw-key="${key}"]`).forEach((sibling) => {
         if (sibling !== el) sibling.innerHTML = html
       })
@@ -452,7 +491,11 @@ export function OhhwellsBridge() {
     }
 
     const handleScroll = () => {
-      if (activeElRef.current) setToolbarRect(activeElRef.current.getBoundingClientRect())
+      if (activeElRef.current) {
+        const r = activeElRef.current.getBoundingClientRect()
+        setToolbarRect(r)
+        setMaxBadge((prev) => (prev ? { ...prev, rect: r } : null))
+      }
       if (hoverCardRef.current) {
         const rect = hoverCardRef.current.getBoundingClientRect()
         setToggleState((prev) => (prev ? { ...prev, rect } : null))
@@ -466,6 +509,7 @@ export function OhhwellsBridge() {
 
     window.addEventListener('message', handleSave)
     document.addEventListener('click', handleClick, true)
+    document.addEventListener('paste', handlePaste, true)
     document.addEventListener('input', handleInput, true)
     document.addEventListener('mouseover', handleMouseOver, true)
     document.addEventListener('mouseout', handleMouseOut, true)
@@ -475,6 +519,7 @@ export function OhhwellsBridge() {
 
     return () => {
       document.removeEventListener('click', handleClick, true)
+      document.removeEventListener('paste', handlePaste, true)
       document.removeEventListener('input', handleInput, true)
       document.removeEventListener('mouseover', handleMouseOver, true)
       document.removeEventListener('mouseout', handleMouseOut, true)
@@ -534,6 +579,30 @@ export function OhhwellsBridge() {
     <>
       {toolbarRect && createPortal(
         <FloatingToolbar rect={toolbarRect} onCommand={handleCommand} />,
+        document.body,
+      )}
+      {maxBadge && createPortal(
+        <div
+          data-ohw-max-badge=""
+          style={{
+            position: 'fixed',
+            top: maxBadge.rect.bottom + 4,
+            left: maxBadge.rect.right,
+            transform: 'translateX(-100%)',
+            zIndex: 2147483647,
+            background: maxBadge.current > maxBadge.max ? '#FEF2F2' : '#F5F5F4',
+            color: maxBadge.current > maxBadge.max ? '#DC2626' : '#78716C',
+            border: `1px solid ${maxBadge.current > maxBadge.max ? '#FECACA' : '#E7E5E4'}`,
+            borderRadius: 4,
+            padding: '2px 6px',
+            fontSize: 11,
+            fontFamily: 'sans-serif',
+            fontWeight: 500,
+            pointerEvents: 'none',
+          }}
+        >
+          {maxBadge.current}/{maxBadge.max}
+        </div>,
         document.body,
       )}
       {toggleState && (
