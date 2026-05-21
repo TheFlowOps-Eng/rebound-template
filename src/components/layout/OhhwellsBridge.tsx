@@ -92,7 +92,7 @@ const TOOLBAR_GROUPS: Array<Array<{ cmd: string; title: string }>> = [
 ]
 
 function GlowFrame({ rect }: { rect: DOMRect }) {
-  const GAP = 4
+  const GAP = 6
   return (
     <div
       style={{
@@ -201,10 +201,11 @@ function FloatingToolbar({
                   height="16"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
+                  stroke={isActive ? '#FFFFFF' : '#1C1917'}
+                  strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
+                  style={isActive && gi > 0 ? { filter: 'drop-shadow(0 0 0.5px #fff)' } : undefined}
                   dangerouslySetInnerHTML={{ __html: ICONS[btn.cmd] }}
                 />
               </button>
@@ -490,7 +491,7 @@ export function OhhwellsBridge() {
         caret-color: #0885FE;
       }
       [data-ohw-editable][contenteditable]::selection,
-      [data-ohw-editable][contenteditable] *::selection { background: rgba(8,133,254,0.35) !important; color: inherit !important; }
+      [data-ohw-editable][contenteditable] *::selection { background: rgba(8,133,254,0.35) !important; }
       [data-ohw-hover-card], [data-ohw-hover-card] * { pointer-events: none !important; }
       [data-ohw-hover-card][data-ohw-force-hover] [data-ohw-editable] { pointer-events: auto !important; }
     `
