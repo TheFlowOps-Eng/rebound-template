@@ -92,7 +92,7 @@ const TOOLBAR_GROUPS: Array<Array<{ cmd: string; title: string }>> = [
 ]
 
 function GlowFrame({ rect }: { rect: DOMRect }) {
-  const GAP = 4
+  const GAP = 6
   return (
     <div
       style={{
@@ -122,10 +122,26 @@ function FloatingToolbar({
 }) {
   const GAP = 8
   const APPROX_H = 36
-  const above = rect.top >= APPROX_H + GAP
-  const anchorTop = above ? rect.top - GAP : rect.bottom + GAP
+  const spaceAbove = rect.top
+  const spaceBelow = window.innerHeight - rect.bottom
+  const fitsAbove = spaceAbove >= APPROX_H + GAP
+  const fitsBelow = spaceBelow >= APPROX_H + GAP
+
+  let anchorTop: number
+  let transform: string
+  if (fitsAbove) {
+    anchorTop = rect.top - GAP
+    transform = 'translateX(-50%) translateY(-100%)'
+  } else if (fitsBelow) {
+    anchorTop = rect.bottom + GAP
+    transform = 'translateX(-50%)'
+  } else {
+    // Block fills the entire viewport — pin to whichever edge is nearest
+    anchorTop = spaceAbove >= spaceBelow ? GAP : window.innerHeight - APPROX_H - GAP
+    transform = 'translateX(-50%)'
+  }
+
   const anchorLeft = Math.max(GAP, Math.min(rect.left + rect.width / 2, window.innerWidth - GAP))
-  const transform = above ? 'translateX(-50%) translateY(-100%)' : 'translateX(-50%)'
 
   return (
     <div
@@ -172,14 +188,12 @@ function FloatingToolbar({
                   alignItems: 'center',
                   justifyContent: 'center',
                   border: 'none',
-                  background: isActive ? '#EFF6FF' : 'transparent',
+                  background: isActive ? '#0885FE' : 'transparent',
                   borderRadius: 4,
                   cursor: 'pointer',
-                  color: isActive ? '#0885FE' : '#1C1917',
+                  color: isActive ? '#FFFFFF' : '#1C1917',
                   flexShrink: 0,
                   padding: 6,
-                  outline: isActive ? '1.5px solid #0885FE' : 'none',
-                  outlineOffset: 2,
                 }}
               >
                 <svg
@@ -187,10 +201,11 @@ function FloatingToolbar({
                   height="16"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
+                  stroke={isActive ? '#FFFFFF' : '#1C1917'}
+                  strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
+                  style={isActive && gi > 0 ? { filter: 'drop-shadow(0 0 0.5px #fff)' } : undefined}
                   dangerouslySetInnerHTML={{ __html: ICONS[btn.cmd] }}
                 />
               </button>
@@ -276,6 +291,8 @@ function StateToggle({
   )
 }
 
+const contentCache = new Map<string, Record<string, string>>()
+
 export function OhhwellsBridge() {
   const pathname = usePathname()
   const router = useRouter()
@@ -335,20 +352,38 @@ export function OhhwellsBridge() {
     deactivate()
     el.setAttribute('contenteditable', 'true')
     el.removeAttribute('data-ohw-hovered')
-    el.focus()
     activeElRef.current = el
     originalContentRef.current = el.innerHTML
+    el.focus()
     setToolbarRect(el.getBoundingClientRect())
     postToParent({ type: 'ow:enter-edit', key: el.dataset.ohwKey })
+    // selectionchange timing varies by browser — refresh after the frame to guarantee
+    // active toolbar commands reflect the cursor state on the very first click.
+    requestAnimationFrame(() => refreshActiveCommandsRef.current())
   }, [deactivate, postToParent])
 
   activateRef.current = activate
   deactivateRef.current = deactivate
 
-  // Fetch saved content; loader hides when fetch completes (or when no subdomain)
+  // Fetch saved content once per subdomain (cached in module-level Map so remounts are free).
   // In edit mode, hydration comes from the canvas editor via ow:hydrate — skip the public fetch.
   useLayoutEffect(() => {
     if (!subdomain || isEditMode) {
+      setFetchState('done')
+      return
+    }
+
+    const applyContent = (content: Record<string, string>) => {
+      for (const [key, html] of Object.entries(content)) {
+        document.querySelectorAll<HTMLElement>(`[data-ohw-key="${key}"]`).forEach((el) => {
+          if (el.innerHTML !== html) el.innerHTML = html
+        })
+      }
+    }
+
+    const cached = contentCache.get(subdomain)
+    if (cached) {
+      applyContent(cached)
       setFetchState('done')
       return
     }
@@ -359,14 +394,10 @@ export function OhhwellsBridge() {
     fetch(`${apiUrl}/api/public/sites/${subdomain}/content`, { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
-        const content = data?.content as Record<string, string> | undefined
-        if (content) {
-          for (const [key, html] of Object.entries(content)) {
-            document.querySelectorAll<HTMLElement>(`[data-ohw-key="${key}"]`).forEach((el) => {
-              el.innerHTML = html
-            })
-          }
-        }
+        if (cancelled) return
+        const content = (data?.content as Record<string, string>) ?? {}
+        contentCache.set(subdomain, content)
+        applyContent(content)
       })
       .catch(() => {})
       .finally(() => {
@@ -375,6 +406,27 @@ export function OhhwellsBridge() {
 
     return () => { cancelled = true }
   }, [subdomain, isEditMode, pathname])
+
+  // Re-apply cached content whenever new DOM nodes appear (handles Next.js page navigation
+  // where page elements commit after the fetch effect already ran).
+  useEffect(() => {
+    if (!subdomain || isEditMode) return
+
+    const applyFromCache = () => {
+      const content = contentCache.get(subdomain)
+      if (!content) return
+      for (const [key, html] of Object.entries(content)) {
+        document.querySelectorAll<HTMLElement>(`[data-ohw-key="${key}"]`).forEach((el) => {
+          if (el.innerHTML !== html) el.innerHTML = html
+        })
+      }
+    }
+
+    applyFromCache()
+    const observer = new MutationObserver(applyFromCache)
+    observer.observe(document.body, { childList: true, subtree: true })
+    return () => observer.disconnect()
+  }, [subdomain, isEditMode])
 
   // Toggle the layout loader (React-owned DOM — never remove it imperatively)
   useLayoutEffect(() => {
@@ -439,7 +491,7 @@ export function OhhwellsBridge() {
         caret-color: #0885FE;
       }
       [data-ohw-editable][contenteditable]::selection,
-      [data-ohw-editable][contenteditable] *::selection { background: rgba(8,133,254,0.35) !important; color: inherit !important; }
+      [data-ohw-editable][contenteditable] *::selection { background: rgba(8,133,254,0.35) !important; }
       [data-ohw-hover-card], [data-ohw-hover-card] * { pointer-events: none !important; }
       [data-ohw-hover-card][data-ohw-force-hover] [data-ohw-editable] { pointer-events: auto !important; }
     `
@@ -541,6 +593,8 @@ export function OhhwellsBridge() {
       const el = e.target as HTMLElement
       const key = el.dataset.ohwKey
       if (!key) return
+
+      if (el === activeElRef.current) setToolbarRect(el.getBoundingClientRect())
 
       const maxLen = el.dataset.ohwMaxLength ? parseInt(el.dataset.ohwMaxLength, 10) : null
       if (maxLen) {
