@@ -122,10 +122,26 @@ function FloatingToolbar({
 }) {
   const GAP = 8
   const APPROX_H = 36
-  const above = rect.top >= APPROX_H + GAP
-  const anchorTop = above ? rect.top - GAP : rect.bottom + GAP
+  const spaceAbove = rect.top
+  const spaceBelow = window.innerHeight - rect.bottom
+  const fitsAbove = spaceAbove >= APPROX_H + GAP
+  const fitsBelow = spaceBelow >= APPROX_H + GAP
+
+  let anchorTop: number
+  let transform: string
+  if (fitsAbove) {
+    anchorTop = rect.top - GAP
+    transform = 'translateX(-50%) translateY(-100%)'
+  } else if (fitsBelow) {
+    anchorTop = rect.bottom + GAP
+    transform = 'translateX(-50%)'
+  } else {
+    // Block fills the entire viewport — pin to whichever edge is nearest
+    anchorTop = spaceAbove >= spaceBelow ? GAP : window.innerHeight - APPROX_H - GAP
+    transform = 'translateX(-50%)'
+  }
+
   const anchorLeft = Math.max(GAP, Math.min(rect.left + rect.width / 2, window.innerWidth - GAP))
-  const transform = above ? 'translateX(-50%) translateY(-100%)' : 'translateX(-50%)'
 
   return (
     <div
@@ -172,14 +188,12 @@ function FloatingToolbar({
                   alignItems: 'center',
                   justifyContent: 'center',
                   border: 'none',
-                  background: isActive ? '#EFF6FF' : 'transparent',
+                  background: isActive ? '#0885FE' : 'transparent',
                   borderRadius: 4,
                   cursor: 'pointer',
-                  color: isActive ? '#0885FE' : '#1C1917',
+                  color: isActive ? '#FFFFFF' : '#1C1917',
                   flexShrink: 0,
                   padding: 6,
-                  outline: isActive ? '1.5px solid #0885FE' : 'none',
-                  outlineOffset: 2,
                 }}
               >
                 <svg
@@ -337,11 +351,14 @@ export function OhhwellsBridge() {
     deactivate()
     el.setAttribute('contenteditable', 'true')
     el.removeAttribute('data-ohw-hovered')
-    el.focus()
     activeElRef.current = el
     originalContentRef.current = el.innerHTML
+    el.focus()
     setToolbarRect(el.getBoundingClientRect())
     postToParent({ type: 'ow:enter-edit', key: el.dataset.ohwKey })
+    // selectionchange timing varies by browser — refresh after the frame to guarantee
+    // active toolbar commands reflect the cursor state on the very first click.
+    requestAnimationFrame(() => refreshActiveCommandsRef.current())
   }, [deactivate, postToParent])
 
   activateRef.current = activate
@@ -575,6 +592,8 @@ export function OhhwellsBridge() {
       const el = e.target as HTMLElement
       const key = el.dataset.ohwKey
       if (!key) return
+
+      if (el === activeElRef.current) setToolbarRect(el.getBoundingClientRect())
 
       const maxLen = el.dataset.ohwMaxLength ? parseInt(el.dataset.ohwMaxLength, 10) : null
       if (maxLen) {
