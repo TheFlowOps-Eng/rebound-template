@@ -694,6 +694,12 @@ export function OhhwellsBridge() {
 
     window.addEventListener('message', handleHydrate)
 
+    const handleDeactivate = (e: MessageEvent) => {
+      if (e.data?.type !== 'ow:deactivate') return
+      deactivateRef.current()
+    }
+    window.addEventListener('message', handleDeactivate)
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return
       const el = activeElRef.current
@@ -776,6 +782,7 @@ export function OhhwellsBridge() {
       window.removeEventListener('scroll', handleScroll, true)
       window.removeEventListener('message', handleSave)
       window.removeEventListener('message', handleHydrate)
+      window.removeEventListener('message', handleDeactivate)
       autoSaveTimers.current.forEach(clearTimeout)
       autoSaveTimers.current.clear()
     }
