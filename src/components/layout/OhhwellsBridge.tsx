@@ -122,6 +122,8 @@ function FloatingToolbar({
 }) {
   const GAP = 8
   const APPROX_H = 36
+  // Estimated toolbar width (9 buttons × 28px + 2 separators × 1px + 10 gaps × 6px + 8px padding ≈ 330px)
+  const APPROX_W = 330
   const spaceAbove = rect.top
   const spaceBelow = window.innerHeight - rect.bottom
   const fitsAbove = spaceAbove >= APPROX_H + GAP
@@ -136,12 +138,13 @@ function FloatingToolbar({
     anchorTop = rect.bottom + GAP
     transform = 'translateX(-50%)'
   } else {
-    // Block fills the entire viewport — pin to whichever edge is nearest
     anchorTop = spaceAbove >= spaceBelow ? GAP : window.innerHeight - APPROX_H - GAP
     transform = 'translateX(-50%)'
   }
 
-  const anchorLeft = Math.max(GAP, Math.min(rect.left + rect.width / 2, window.innerWidth - GAP))
+  // Clamp so the full toolbar width stays in the viewport — shifts left/right near edges
+  const rawLeft = rect.left + rect.width / 2
+  const anchorLeft = Math.max(GAP + APPROX_W / 2, Math.min(rawLeft, window.innerWidth - GAP - APPROX_W / 2))
 
   return (
     <div
@@ -441,6 +444,39 @@ export function OhhwellsBridge() {
     postToParent({ type: 'ow:navigation', path: pathname })
   }, [pathname, postToParent])
 
+  // Report full document height so the parent can size the iframe to content (edit mode only).
+  // Uses document.body.scrollHeight — more reliable than documentElement when html has overflow quirks.
+  // Listens for WIDTH changes only (desktop↔mobile switch re-lays out content at a different height).
+  // Height-only resize events (parent setting iframeHeight) are intentionally ignored to prevent loops.
+  useEffect(() => {
+    if (!isEditMode) return
+
+    const measure = () => {
+      const h = document.body.scrollHeight
+      if (h > 50) postToParent({ type: 'ow:height', height: h })
+    }
+
+    const t1 = setTimeout(measure, 50)
+    const t2 = setTimeout(measure, 500)
+
+    let lastWidth = window.innerWidth
+    let resizeTimer: ReturnType<typeof setTimeout> | null = null
+    const handleResize = () => {
+      if (window.innerWidth === lastWidth) return
+      lastWidth = window.innerWidth
+      if (resizeTimer) clearTimeout(resizeTimer)
+      resizeTimer = setTimeout(measure, 150)
+    }
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      clearTimeout(t1)
+      clearTimeout(t2)
+      if (resizeTimer) clearTimeout(resizeTimer)
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [pathname, isEditMode, postToParent])
+
   // Preserve ?subdomain on internal navigation when using query-param mode (not hostname mode)
   useEffect(() => {
     if (!subdomainFromQuery || isEditMode) return
@@ -474,9 +510,20 @@ export function OhhwellsBridge() {
     }
 
     if (!editStylesRef.current) {
+      // Capture the initial iframe viewport height before the parent adjusts it.
+      // Freezing min-h-screen / h-screen to this px value lets hero sections keep their
+      // full-viewport design while preventing the 100vh feedback loop when the iframe grows.
+      const initialVh = window.innerHeight
       const base = document.createElement('style')
       base.setAttribute('data-ohw-edit-style', '')
       base.textContent = `
+      html { height: auto !important; }
+      body { height: auto !important; min-height: 0 !important; overflow: hidden !important; }
+      .min-h-screen, .min-h-svh, .min-h-dvh { min-height: ${initialVh}px !important; }
+      .h-screen, .h-svh, .h-dvh { height: ${initialVh}px !important; }
+      [style*="100vh"] { min-height: ${initialVh}px !important; height: ${initialVh}px !important; }
+      [style*="100svh"] { min-height: ${initialVh}px !important; height: ${initialVh}px !important; }
+      [style*="100dvh"] { min-height: ${initialVh}px !important; height: ${initialVh}px !important; }
       [data-ohw-editable] {
         display: block;
       }
@@ -627,6 +674,9 @@ export function OhhwellsBridge() {
       timers.set(key, setTimeout(() => {
         timers.delete(key)
         postToParentRef.current({ type: 'ow:change', nodes: [{ key, text: html }] })
+        // Re-measure height after content changes (Enter key etc. may grow the page)
+        const h = document.documentElement.scrollHeight
+        if (h > 50) postToParentRef.current({ type: 'ow:height', height: h })
       }, 400))
     }
 
