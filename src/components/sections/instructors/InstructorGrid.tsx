@@ -237,7 +237,14 @@ function Card({ p }: { p: Instructor }) {
   const formats = p.formats ?? [];
   const slug = p.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
   return (
-    <article className="ig-card" data-ohw-hover-card="" tabIndex={0} aria-label={p.name}>
+    <article
+      className="ig-card"
+      data-ohw-hover-card=""
+      data-ohw-editable="image"
+      data-ohw-key={`${slug}-img`}
+      tabIndex={0}
+      aria-label={p.name}
+    >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img className="ig-img" src={p.img} alt={p.name} />
       <h2 className="ig-name" data-ohw-editable="text" data-ohw-key={`${slug}-name`}>{p.name}</h2>

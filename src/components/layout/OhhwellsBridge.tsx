@@ -7,11 +7,17 @@ type EditableNode = { key: string; type: string; text: string }
 
 
 function collectEditableNodes(): EditableNode[] {
-  return Array.from(document.querySelectorAll<HTMLElement>('[data-ohw-editable]')).map((el) => ({
-    key: el.dataset.ohwKey ?? '',
-    type: el.dataset.ohwEditable ?? 'text',
-    text: el.dataset.ohwEditable === 'plain' ? (el.innerText ?? '') : el.innerHTML,
-  }))
+  return Array.from(document.querySelectorAll<HTMLElement>('[data-ohw-editable]')).map((el) => {
+    if (el.dataset.ohwEditable === 'image') {
+      const img = el instanceof HTMLImageElement ? el : el.querySelector<HTMLImageElement>('img')
+      return { key: el.dataset.ohwKey ?? '', type: 'image', text: img?.src ?? '' }
+    }
+    return {
+      key: el.dataset.ohwKey ?? '',
+      type: el.dataset.ohwEditable ?? 'text',
+      text: el.dataset.ohwEditable === 'plain' ? (el.innerText ?? '') : el.innerHTML,
+    }
+  })
 }
 
 // Reads all :hover rules from the page's own stylesheets and returns equivalent
@@ -322,6 +328,7 @@ export function OhhwellsBridge() {
   const activeElRef = useRef<HTMLElement | null>(null)
   const originalContentRef = useRef<string | null>(null)
   const hoverCardRef = useRef<HTMLElement | null>(null)
+  const hoveredImageRef = useRef<HTMLElement | null>(null)
   const editStylesRef = useRef<{ base: HTMLStyleElement; forceHover: HTMLStyleElement } | null>(null)
   const activateRef = useRef<(el: HTMLElement) => void>(() => {})
   const deactivateRef = useRef<() => void>(() => {})
@@ -377,9 +384,14 @@ export function OhhwellsBridge() {
     }
 
     const applyContent = (content: Record<string, string>) => {
-      for (const [key, html] of Object.entries(content)) {
+      for (const [key, val] of Object.entries(content)) {
         document.querySelectorAll<HTMLElement>(`[data-ohw-key="${key}"]`).forEach((el) => {
-          if (el.innerHTML !== html) el.innerHTML = html
+          if (el.dataset.ohwEditable === 'image') {
+            const img = el instanceof HTMLImageElement ? el : el.querySelector<HTMLImageElement>('img')
+            if (img && img.src !== val) img.src = val
+          } else if (el.innerHTML !== val) {
+            el.innerHTML = val
+          }
         })
       }
     }
@@ -418,9 +430,14 @@ export function OhhwellsBridge() {
     const applyFromCache = () => {
       const content = contentCache.get(subdomain)
       if (!content) return
-      for (const [key, html] of Object.entries(content)) {
+      for (const [key, val] of Object.entries(content)) {
         document.querySelectorAll<HTMLElement>(`[data-ohw-key="${key}"]`).forEach((el) => {
-          if (el.innerHTML !== html) el.innerHTML = html
+          if (el.dataset.ohwEditable === 'image') {
+            const img = el instanceof HTMLImageElement ? el : el.querySelector<HTMLImageElement>('img')
+            if (img && img.src !== val) img.src = val
+          } else if (el.innerHTML !== val) {
+            el.innerHTML = val
+          }
         })
       }
     }
@@ -528,6 +545,7 @@ export function OhhwellsBridge() {
         display: block;
       }
       [data-ohw-editable]:not([contenteditable]) { cursor: text !important; }
+      [data-ohw-editable="image"] { cursor: pointer !important; }
       [data-ohw-hovered]:not([contenteditable]) {
         outline: 2px dashed #0885FE !important;
         outline-offset: 4px;
@@ -581,14 +599,18 @@ export function OhhwellsBridge() {
 
     const handleMouseOver = (e: MouseEvent) => {
       const editable = (e.target as HTMLElement).closest<HTMLElement>('[data-ohw-editable]')
-      if (editable && !editable.hasAttribute('contenteditable')) {
+      if (!editable) return
+      if (editable.dataset.ohwEditable !== 'image' && !editable.hasAttribute('contenteditable')) {
         editable.setAttribute('data-ohw-hovered', '')
       }
     }
 
     const handleMouseOut = (e: MouseEvent) => {
       const editable = (e.target as HTMLElement).closest<HTMLElement>('[data-ohw-editable]')
-      if (editable) editable.removeAttribute('data-ohw-hovered')
+      if (!editable) return
+      if (editable.dataset.ohwEditable !== 'image') {
+        editable.removeAttribute('data-ohw-hovered')
+      }
     }
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -619,6 +641,64 @@ export function OhhwellsBridge() {
       } else {
         setToggleState(null)
       }
+
+      // Image hover detection via bounding rect — works even when pointer-events: none
+      const imageEls = Array.from(document.querySelectorAll<HTMLElement>('[data-ohw-editable="image"]'))
+      const imgEl = imageEls.find((el) => {
+        const r = el.getBoundingClientRect()
+        return clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom
+      }) ?? null
+
+      if (imgEl !== hoveredImageRef.current) {
+        if (imgEl) {
+          hoveredImageRef.current = imgEl
+          const r = imgEl.getBoundingClientRect()
+          postToParentRef.current({ type: 'ow:image-hover', key: imgEl.dataset.ohwKey ?? '',
+            rect: { top: r.top, left: r.left, width: r.width, height: r.height } })
+        } else {
+          hoveredImageRef.current = null
+          postToParentRef.current({ type: 'ow:image-unhover' })
+        }
+      }
+    }
+
+    const handleDragOver = (e: DragEvent) => {
+      const el = (e.target as HTMLElement).closest<HTMLElement>('[data-ohw-editable="image"]')
+      if (!el) return
+      e.preventDefault()
+      e.dataTransfer!.dropEffect = 'copy'
+      hoveredImageRef.current = el
+      const r = el.getBoundingClientRect()
+      postToParentRef.current({ type: 'ow:image-hover', key: el.dataset.ohwKey ?? '',
+        rect: { top: r.top, left: r.left, width: r.width, height: r.height }, isDragOver: true })
+    }
+
+    const handleDragLeave = (e: DragEvent) => {
+      if ((e.target as HTMLElement).closest('[data-ohw-editable="image"]')) {
+        hoveredImageRef.current = null
+        postToParentRef.current({ type: 'ow:image-unhover' })
+      }
+    }
+
+    const handleDrop = (e: DragEvent) => {
+      const el = (e.target as HTMLElement).closest<HTMLElement>('[data-ohw-editable="image"]')
+      if (!el) return
+      e.preventDefault()
+      const file = e.dataTransfer?.files?.[0]
+      if (file?.type.startsWith('image/'))
+        postToParentRef.current({ type: 'ow:image-drop', key: el.dataset.ohwKey ?? '', file })
+      hoveredImageRef.current = null
+      postToParentRef.current({ type: 'ow:image-unhover' })
+    }
+
+    const handleImageUrl = (e: MessageEvent) => {
+      if (e.data?.type !== 'ow:image-url') return
+      const { key, url } = e.data as { key: string; url: string }
+      document.querySelectorAll<HTMLElement>(`[data-ohw-key="${key}"]`).forEach((el) => {
+        if (el.dataset.ohwEditable !== 'image') return
+        const img = el instanceof HTMLImageElement ? el : el.querySelector<HTMLImageElement>('img')
+        if (img) img.src = url
+      })
     }
 
     const handlePaste = (e: ClipboardEvent) => {
@@ -684,9 +764,14 @@ export function OhhwellsBridge() {
       if (e.data?.type !== 'ow:hydrate') return
       const content = e.data.content as Record<string, string> | undefined
       if (!content) return
-      for (const [key, html] of Object.entries(content)) {
+      for (const [key, val] of Object.entries(content)) {
         document.querySelectorAll<HTMLElement>(`[data-ohw-key="${key}"]`).forEach((el) => {
-          el.innerHTML = html
+          if (el.dataset.ohwEditable === 'image') {
+            const img = el instanceof HTMLImageElement ? el : el.querySelector<HTMLImageElement>('img')
+            if (img) img.src = val
+          } else {
+            el.innerHTML = val
+          }
         })
       }
       postToParentRef.current({ type: 'ow:hydrate-done' })
@@ -722,6 +807,11 @@ export function OhhwellsBridge() {
       if (hoverCardRef.current) {
         const rect = hoverCardRef.current.getBoundingClientRect()
         setToggleState((prev) => (prev ? { ...prev, rect } : null))
+      }
+      if (hoveredImageRef.current) {
+        const r = hoveredImageRef.current.getBoundingClientRect()
+        postToParentRef.current({ type: 'ow:image-hover', key: hoveredImageRef.current.dataset.ohwKey ?? '',
+          rect: { top: r.top, left: r.left, width: r.width, height: r.height } })
       }
     }
 
@@ -760,12 +850,16 @@ export function OhhwellsBridge() {
     refreshActiveCommandsRef.current = handleSelectionChange
 
     window.addEventListener('message', handleSave)
+    window.addEventListener('message', handleImageUrl)
     document.addEventListener('click', handleClick, true)
     document.addEventListener('paste', handlePaste, true)
     document.addEventListener('input', handleInput, true)
     document.addEventListener('mouseover', handleMouseOver, true)
     document.addEventListener('mouseout', handleMouseOut, true)
     document.addEventListener('mousemove', handleMouseMove, true)
+    document.addEventListener('dragover', handleDragOver, true)
+    document.addEventListener('dragleave', handleDragLeave, true)
+    document.addEventListener('drop', handleDrop, true)
     document.addEventListener('keydown', handleKeyDown)
     document.addEventListener('selectionchange', handleSelectionChange)
     window.addEventListener('scroll', handleScroll, true)
@@ -777,10 +871,14 @@ export function OhhwellsBridge() {
       document.removeEventListener('mouseover', handleMouseOver, true)
       document.removeEventListener('mouseout', handleMouseOut, true)
       document.removeEventListener('mousemove', handleMouseMove, true)
+      document.removeEventListener('dragover', handleDragOver, true)
+      document.removeEventListener('dragleave', handleDragLeave, true)
+      document.removeEventListener('drop', handleDrop, true)
       document.removeEventListener('keydown', handleKeyDown)
       document.removeEventListener('selectionchange', handleSelectionChange)
       window.removeEventListener('scroll', handleScroll, true)
       window.removeEventListener('message', handleSave)
+      window.removeEventListener('message', handleImageUrl)
       window.removeEventListener('message', handleHydrate)
       window.removeEventListener('message', handleDeactivate)
       autoSaveTimers.current.forEach(clearTimeout)
