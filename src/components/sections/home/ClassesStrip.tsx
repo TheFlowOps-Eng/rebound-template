@@ -94,15 +94,20 @@ export function ClassesStrip({ eyebrow, headline, headlineEm, viewAll, items }: 
 
       {/* Desktop / tablet: separate image strip + copy strip */}
       <div className="classes-images">
-        {items.map((c) => (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img
-            key={c.name}
-            src={c.img}
-            alt={c.name}
-            className="classes-card-img"
-          />
-        ))}
+        {items.map((c) => {
+          const slug = c.name.toLowerCase().replace(/\s+/g, "-");
+          return (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              key={c.name}
+              data-ohw-editable="image"
+              data-ohw-key={`class-strip-${slug}-img`}
+              src={c.img}
+              alt={c.name}
+              className="classes-card-img"
+            />
+          );
+        })}
       </div>
       <div className="classes-copy" style={{ padding: "44px 0 0" }}>
         {items.map((c) => {
@@ -154,7 +159,13 @@ export function ClassesStrip({ eyebrow, headline, headlineEm, viewAll, items }: 
           return (
           <article key={c.name} className="classes-card">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={c.img} alt={c.name} className="classes-card-img" />
+            <img
+              data-ohw-editable="image"
+              data-ohw-key={`class-strip-${slug}-img`}
+              src={c.img}
+              alt={c.name}
+              className="classes-card-img"
+            />
             <div className="classes-card-copy">
               <h3
                 data-ohw-editable="text"

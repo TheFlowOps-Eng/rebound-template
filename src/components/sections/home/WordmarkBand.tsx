@@ -5,6 +5,8 @@ type Props = HomeContent["wordmark"];
 export function WordmarkBand({ background, logo, alt }: Props) {
   return (
     <div
+      data-ohw-editable="bg-image"
+      data-ohw-key="wordmark-bg"
       role="img"
       aria-label={alt}
       style={{
@@ -30,6 +32,8 @@ export function WordmarkBand({ background, logo, alt }: Props) {
       />
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
+        data-ohw-editable="image"
+        data-ohw-key="wordmark-logo"
         src={logo}
         alt={alt}
         style={{

@@ -6,11 +6,16 @@ type Props = HomeContent["hero"];
 export function Hero({ headline, headlineEm, subhead, cta, background }: Props) {
   return (
     <section
+      data-ohw-editable="bg-image"
+      data-ohw-key="hero-bg"
       style={{
         position: "relative",
         minHeight: "100svh",
         display: "flex",
-        background: `url('${background}') center/cover no-repeat`,
+        backgroundImage: `url('${background}')`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
         color: "var(--bone)",
       }}
     >

@@ -16,7 +16,7 @@ export const metadata = buildMetadata({
 export default function StudioPage() {
   return (
     <>
-      <PageHeader {...studioContent.header} ohwKey="studio-page-title" />
+      <PageHeader {...studioContent.header} ohwKey="studio-page-title" bgKey="studio-header-bg" />
       <StudioIntro {...studioContent.intro} />
       <StudioGallery images={studioContent.gallery} />
       <StudioFeatures {...studioContent.features} />

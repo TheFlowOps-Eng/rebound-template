@@ -56,18 +56,21 @@ export function Manifesto({ headline, primaryCta, secondaryCta, strip }: Props) 
           animation: manifesto-marquee 70s linear infinite;
           will-change: transform;
         }
-        .manifesto-track:hover { animation-play-state: paused; }
+        .manifesto-track:hover,
+        .manifesto-track[data-ohw-hover-paused] { animation-play-state: paused; }
         @media (prefers-reduced-motion: reduce) {
           .manifesto-track { animation: none; }
         }
       `}</style>
 
       <div style={{ width: "100%", overflow: "hidden" }}>
-        <div className="manifesto-track">
+        <div className="manifesto-track" data-ohw-hover-pause="">
           {loop.map((img, i) => (
             /* eslint-disable-next-line @next/next/no-img-element */
             <img
               key={i}
+              data-ohw-editable="image"
+              data-ohw-key={`manifesto-img-${i % strip.length}`}
               src={img.src}
               alt={img.alt}
               aria-hidden={i >= strip.length ? true : undefined}

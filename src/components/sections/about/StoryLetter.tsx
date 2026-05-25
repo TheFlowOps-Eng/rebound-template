@@ -34,7 +34,12 @@ export function StoryLetter({ eyebrow, paragraphs, signature }: Props) {
           alignItems: "start",
         }}
       >
-        <div className="story-board-wrap">
+        <div
+          className="story-board-wrap"
+          data-ohw-editable="image"
+          data-ohw-hover-card=""
+          data-ohw-key="story-board-img"
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/assets/Board.png"

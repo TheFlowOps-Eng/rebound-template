@@ -70,6 +70,8 @@ export function LagreeExplainer({ headline, headlineEm, body, image, cards, cta 
           </p>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
+            data-ohw-editable="image"
+            data-ohw-key="explainer-img"
             src={image.src}
             alt={image.alt}
             style={{

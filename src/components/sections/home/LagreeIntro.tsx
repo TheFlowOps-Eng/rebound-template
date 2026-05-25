@@ -89,7 +89,12 @@ export function LagreeIntro({ eyebrow, headlineEm, headline, body, cta, image }:
             {cta.label}
           </Link>
         </div>
-        <div style={{ position: "relative" }}>
+        <div
+          data-ohw-editable="image"
+          data-ohw-hover-card=""
+          data-ohw-key="lagree-intro-img"
+          style={{ position: "relative" }}
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={image.src}
