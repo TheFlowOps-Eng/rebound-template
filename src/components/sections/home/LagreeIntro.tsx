@@ -91,7 +91,6 @@ export function LagreeIntro({ eyebrow, headlineEm, headline, body, cta, image }:
         </div>
         <div
           data-ohw-editable="image"
-          data-ohw-hover-card=""
           data-ohw-key="lagree-intro-img"
           style={{ position: "relative" }}
         >

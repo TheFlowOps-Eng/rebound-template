@@ -37,7 +37,6 @@ export function StoryLetter({ eyebrow, paragraphs, signature }: Props) {
         <div
           className="story-board-wrap"
           data-ohw-editable="image"
-          data-ohw-hover-card=""
           data-ohw-key="story-board-img"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
