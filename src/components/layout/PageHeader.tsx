@@ -3,14 +3,17 @@ export function PageHeader({
   image,
   height = 320,
   ohwKey,
+  bgKey,
 }: {
   title: string;
   image: string;
   height?: number;
   ohwKey?: string;
+  bgKey?: string;
 }) {
   return (
     <header
+      {...(bgKey ? { 'data-ohw-editable': 'bg-image', 'data-ohw-key': bgKey } : {})}
       style={{
         position: "relative",
         width: "100%",

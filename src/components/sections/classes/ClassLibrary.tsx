@@ -101,6 +101,8 @@ export function ClassLibrary({ filters, items }: Props) {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
+              data-ohw-editable="image"
+              data-ohw-key={`class-lib-${c.id}-img`}
               src={c.img}
               alt={c.name}
               style={{

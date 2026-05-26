@@ -201,17 +201,20 @@ export function MonthlyMemberships({
         {/* Benefits panel */}
         <div
           className="pm-benefits"
+          data-ohw-editable="bg-image"
+          data-ohw-key="benefits-bg"
           style={{
             position: "relative",
-            padding: "48px 44px",
             color: "var(--bone)",
             overflow: "hidden",
             backgroundColor: "var(--espresso, #2a1f17)",
-            backgroundImage: `linear-gradient(180deg, rgba(20,12,8,.78) 0%, rgba(20,12,8,.86) 100%), url('${benefits.image.src}')`,
+            backgroundImage: `url('${benefits.image.src}')`,
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
         >
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(20,12,8,.78) 0%, rgba(20,12,8,.86) 100%)", pointerEvents: "none" }} />
+          <div style={{ position: "relative", padding: "48px 44px" }}>
           <span
             data-ohw-editable="text"
             data-ohw-key="benefits-eyebrow"
@@ -264,6 +267,7 @@ export function MonthlyMemberships({
               </li>
             ))}
           </ul>
+          </div>
         </div>
       </div>
     </section>

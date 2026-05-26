@@ -41,6 +41,8 @@ export function Testimonials({ items, primaryCta, secondaryCta, background }: Pr
       }}
     >
       <div
+        data-ohw-editable="bg-image"
+        data-ohw-key="testimonials-bg"
         style={{
           position: "absolute",
           inset: 0,

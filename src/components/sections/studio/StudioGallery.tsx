@@ -68,6 +68,8 @@ export function StudioGallery({ images }: Props) {
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
             key={img.src + i}
+            data-ohw-editable="image"
+            data-ohw-key={`studio-gallery-${i + 1}-img`}
             src={img.src}
             alt={img.alt}
             className={`sg-tile sg-tile-${i + 1}`}
