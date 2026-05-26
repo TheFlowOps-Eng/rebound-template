@@ -563,7 +563,8 @@ export function OhhwellsBridge() {
         display: block;
       }
       [data-ohw-editable]:not([contenteditable]):not([data-ohw-editable="image"]):not([data-ohw-editable="bg-image"]) { cursor: text !important; }
-      [data-ohw-editable="image"] { cursor: pointer !important; }
+      [data-ohw-editable="image"], [data-ohw-editable="image"] *,
+      [data-ohw-editable="bg-image"], [data-ohw-editable="bg-image"] * { cursor: pointer !important; }
       [data-ohw-hovered]:not([contenteditable]) {
         outline: 2px dashed #0885FE !important;
         outline-offset: 4px;
@@ -577,6 +578,8 @@ export function OhhwellsBridge() {
       [data-ohw-editable][contenteditable] *::selection { background: rgba(8,133,254,0.35) !important; }
       [data-ohw-hover-card], [data-ohw-hover-card] * { pointer-events: none !important; }
       [data-ohw-hover-card][data-ohw-force-hover] [data-ohw-editable] { pointer-events: auto !important; }
+      [data-ohw-hover-card][data-ohw-editable="image"],
+      [data-ohw-hover-card][data-ohw-editable="image"] * { pointer-events: auto !important; cursor: pointer !important; }
     `
       const forceHover = document.createElement('style')
       forceHover.setAttribute('data-ohw-force-hover-style', '')
@@ -595,12 +598,14 @@ export function OhhwellsBridge() {
 
       const editable = target.closest<HTMLElement>('[data-ohw-editable]')
       if (editable) {
-        // image and bg-image elements are replaced via the parent overlay — don't enter text-edit mode
-        if (editable.dataset.ohwEditable !== 'bg-image' && editable.dataset.ohwEditable !== 'image') {
+        if (editable.dataset.ohwEditable === 'image' || editable.dataset.ohwEditable === 'bg-image') {
           e.preventDefault()
-          activateRef.current(editable)
+          postToParentRef.current({ type: 'ow:image-pick', key: editable.dataset.ohwKey ?? '' })
           return
         }
+        e.preventDefault()
+        activateRef.current(editable)
+        return
       }
 
       // Don't deactivate if user drag-selected text from inside the editable to outside
@@ -748,24 +753,36 @@ export function OhhwellsBridge() {
     ) => {
       const imgEl = findImageAtPoint(clientX, clientY, fromParentViewport)
 
-      if (imgEl !== hoveredImageRef.current) {
-        if (imgEl) {
+      if (imgEl) {
+        // If a text editable is rendered on top of the image at the cursor position, text has priority.
+        const { x, y } = toProbeCoords(clientX, clientY, fromParentViewport)
+        const topEl = document.elementFromPoint(x, y) as HTMLElement | null
+        const topEditable = topEl?.closest<HTMLElement>('[data-ohw-editable]')
+        if (topEditable && topEditable.dataset.ohwEditable !== 'image' && topEditable.dataset.ohwEditable !== 'bg-image') {
+          if (hoveredImageRef.current) {
+            hoveredImageRef.current = null
+            resumeAnimTracks()
+            postToParentRef.current({ type: 'ow:image-unhover' })
+          }
+          return
+        }
+        if (activeElRef.current) deactivateRef.current()
+        if (imgEl !== hoveredImageRef.current) {
           hoveredImageRef.current = imgEl
           postImageHover(imgEl, isDragOver)
-        } else {
-          // Pointer left the image but may have moved onto the parent Replace overlay — don't unhover.
-          const inIframeView =
-            clientX >= 0 &&
-            clientY >= 0 &&
-            clientX <= window.innerWidth &&
-            clientY <= window.innerHeight
-          if (!inIframeView) return
-          hoveredImageRef.current = null
-          resumeAnimTracks()
-          postToParentRef.current({ type: 'ow:image-unhover' })
+        } else if (isDragOver) {
+          postImageHover(imgEl, true)
         }
-      } else if (imgEl && isDragOver) {
-        postImageHover(imgEl, true)
+      } else {
+        const inIframeView =
+          clientX >= 0 &&
+          clientY >= 0 &&
+          clientX <= window.innerWidth &&
+          clientY <= window.innerHeight
+        if (!inIframeView) return
+        hoveredImageRef.current = null
+        resumeAnimTracks()
+        postToParentRef.current({ type: 'ow:image-unhover' })
       }
     }
 
@@ -800,7 +817,7 @@ export function OhhwellsBridge() {
 
     const handleMouseMove = (e: MouseEvent) => {
       const { clientX, clientY } = e
-      if (!activeElRef.current) probeImageAt(clientX, clientY)
+      probeImageAt(clientX, clientY)
       probeHoverCardsAt(clientX, clientY)
     }
 
@@ -822,18 +839,22 @@ export function OhhwellsBridge() {
       if (!el) return
       e.preventDefault()
       e.dataTransfer!.dropEffect = 'copy'
-      hoveredImageRef.current = el
-      const r = el.getBoundingClientRect()
-      postToParentRef.current({ type: 'ow:image-hover', key: el.dataset.ohwKey ?? '',
-        rect: { top: r.top, left: r.left, width: r.width, height: r.height }, isDragOver: true })
+      if (hoveredImageRef.current !== el) {
+        hoveredImageRef.current = el
+        const r = el.getBoundingClientRect()
+        postToParentRef.current({ type: 'ow:image-hover', key: el.dataset.ohwKey ?? '',
+          rect: { top: r.top, left: r.left, width: r.width, height: r.height }, isDragOver: true })
+      }
     }
 
     const handleDragLeave = (e: DragEvent) => {
-      if ((e.target as HTMLElement).closest('[data-ohw-editable="image"], [data-ohw-editable="bg-image"]')) {
-        hoveredImageRef.current = null
-        resumeAnimTracks()
-        postToParentRef.current({ type: 'ow:image-unhover' })
-      }
+      const imgEl = (e.target as HTMLElement).closest<HTMLElement>('[data-ohw-editable="image"], [data-ohw-editable="bg-image"]')
+      if (!imgEl) return
+      // Cursor moved to another child of the same image container — keep the overlay
+      if (e.relatedTarget instanceof Node && imgEl.contains(e.relatedTarget)) return
+      hoveredImageRef.current = null
+      resumeAnimTracks()
+      postToParentRef.current({ type: 'ow:image-unhover' })
     }
 
     const handleDrop = (e: DragEvent) => {
@@ -841,8 +862,21 @@ export function OhhwellsBridge() {
       if (!el) return
       e.preventDefault()
       const file = e.dataTransfer?.files?.[0]
-      if (file?.type.startsWith('image/'))
-        postToParentRef.current({ type: 'ow:image-drop', key: el.dataset.ohwKey ?? '', file })
+      if (file) {
+        if (file.type.startsWith('image/')) {
+          const key = el.dataset.ohwKey ?? ''
+          const { name, type: mimeType } = file
+          const r = el.getBoundingClientRect()
+          const rect = { top: r.top, left: r.left, width: r.width, height: r.height }
+          // File byte content does not survive postMessage structured-clone — read it first
+          // then transfer the ArrayBuffer directly (which is a proper Transferable).
+          file.arrayBuffer().then((buf) => {
+            window.parent.postMessage({ type: 'ow:image-drop', key, name, mimeType, buf, rect }, '*', [buf])
+          })
+        } else {
+          postToParentRef.current({ type: 'ow:image-drop-invalid' })
+        }
+      }
       hoveredImageRef.current = null
       resumeAnimTracks()
       postToParentRef.current({ type: 'ow:image-unhover' })
