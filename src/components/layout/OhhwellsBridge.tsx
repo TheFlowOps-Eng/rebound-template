@@ -2,6 +2,69 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 const PRIMARY = '#0885FE'
+const IMAGE_FADE_MS = 300
+
+function runOpacityFade(el: HTMLElement, onDone: () => void) {
+  const anim = el.animate([{ opacity: 0 }, { opacity: 1 }], {
+    duration: IMAGE_FADE_MS,
+    easing: 'ease',
+    fill: 'forwards',
+  })
+  let finished = false
+  const finish = () => {
+    if (finished) return
+    finished = true
+    anim.cancel()
+    el.style.opacity = ''
+    onDone()
+  }
+  anim.finished.then(finish).catch(finish)
+  window.setTimeout(finish, IMAGE_FADE_MS + 100)
+}
+
+/** After load: unmount skeleton (onReady), then fade <img> in. */
+function fadeInImageElement(img: HTMLElement, onReady: () => void) {
+  // #region agent log
+  fetch('http://127.0.0.1:7397/ingest/4786e4b5-bf1a-4684-8031-b88d9c0a732f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'e403fd'},body:JSON.stringify({sessionId:'e403fd',location:'OhhwellsBridge:fadeInImageElement',message:'iframe image fade start',data:{src:img.getAttribute('src')?.slice(0,80)},timestamp:Date.now()})}).catch(()=>{});
+  // #endregion
+  onReady()
+  img.style.opacity = '0'
+  runOpacityFade(img, () => {
+    img.style.opacity = ''
+  })
+}
+
+/** After load: unmount skeleton, fade new background layer in so text stays visible. */
+function fadeInBgImage(el: HTMLElement, url: string, onReady: () => void) {
+  const prevPos = el.style.position
+  if (!prevPos || prevPos === 'static') el.style.position = 'relative'
+
+  const layer = document.createElement('div')
+  layer.setAttribute('data-ohw-bg-fade-layer', '')
+  Object.assign(layer.style, {
+    position: 'absolute',
+    inset: '0',
+    zIndex: '0',
+    backgroundImage: `url('${url}')`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    opacity: '0',
+    pointerEvents: 'none',
+  })
+  el.prepend(layer)
+
+  // #region agent log
+  fetch('http://127.0.0.1:7397/ingest/4786e4b5-bf1a-4684-8031-b88d9c0a732f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'e403fd'},body:JSON.stringify({sessionId:'e403fd',location:'OhhwellsBridge:fadeInBgImage',message:'iframe bg fade start',timestamp:Date.now()})}).catch(()=>{});
+  // #endregion
+  onReady()
+
+  runOpacityFade(layer, () => {
+    el.style.backgroundImage = `url('${url}')`
+    layer.remove()
+    if (!prevPos || prevPos === 'static') el.style.position = prevPos
+  })
+}
 import { createPortal } from 'react-dom'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { isEditSessionActive } from '@/lib/ohw-session-search'
@@ -767,6 +830,7 @@ export function OhhwellsBridge() {
       clientY: number,
       isDragOver = false,
       fromParentViewport = false,
+      fromOverlay = false,
     ) => {
       // If the cursor is over the state toggle, hide the image overlay so the toggle is clickable.
       const toggleEl = document.querySelector('[data-ohw-state-toggle]')
@@ -788,21 +852,32 @@ export function OhhwellsBridge() {
         // If a text editable is rendered on top of the image at the cursor position, text has priority.
         const { x, y } = toProbeCoords(clientX, clientY, fromParentViewport)
         const topEl = document.elementFromPoint(x, y) as HTMLElement | null
-        const topEditable = topEl?.closest<HTMLElement>('[data-ohw-editable]')
-        if (topEditable && topEditable.dataset.ohwEditable !== 'image' && topEditable.dataset.ohwEditable !== 'bg-image') {
+
+        // Floating text toolbar sits over the hero — same priority as text (dismiss image overlay).
+        if (topEl?.closest('[data-ohw-toolbar]')) {
           if (hoveredImageRef.current) {
             hoveredImageRef.current = null
             resumeAnimTracks()
             postToParentRef.current({ type: 'ow:image-unhover' })
           }
-          if (!topEditable.hasAttribute('contenteditable')) {
-            document.querySelectorAll<HTMLElement>('[data-ohw-hovered]').forEach(el => el.removeAttribute('data-ohw-hovered'))
-            topEditable.setAttribute('data-ohw-hovered', '')
+          return
+        }
+
+        const topEditable = topEl?.closest<HTMLElement>('[data-ohw-editable]')
+        if (topEditable && topEditable.dataset.ohwEditable !== 'image' && topEditable.dataset.ohwEditable !== 'bg-image') {
+          // Keep image hover ONLY when the probe came from the overlay button area,
+          // so the overlay stays visible while the cursor is on/near the Replace button.
+          if (topEditable.hasAttribute('contenteditable') && fromOverlay) return
+          if (hoveredImageRef.current) {
+            hoveredImageRef.current = null
+            resumeAnimTracks()
+            postToParentRef.current({ type: 'ow:image-unhover' })
           }
+          document.querySelectorAll<HTMLElement>('[data-ohw-hovered]').forEach(el => el.removeAttribute('data-ohw-hovered'))
+          topEditable.setAttribute('data-ohw-hovered', '')
           return
         }
         document.querySelectorAll<HTMLElement>('[data-ohw-hovered]').forEach(el => el.removeAttribute('data-ohw-hovered'))
-        if (activeElRef.current) deactivateRef.current()
         if (imgEl !== hoveredImageRef.current) {
           hoveredImageRef.current = imgEl
           postImageHover(imgEl, isDragOver)
@@ -859,11 +934,12 @@ export function OhhwellsBridge() {
 
     const handlePointerSync = (e: MessageEvent) => {
       if (e.data?.type !== 'ow:pointer-sync') return
-      const { clientX, clientY } = e.data as { clientX?: number; clientY?: number }
+      const { clientX, clientY, fromOverlay } = e.data as { clientX?: number; clientY?: number; fromOverlay?: boolean }
       if (typeof clientX !== 'number' || typeof clientY !== 'number') return
       // Parent now sends iframe-local coords (clientX - iframeRect.left, clientY - iframeRect.top)
       // so we can call probeImageAt directly — no coordinate conversion needed, works cross-origin.
-      probeImageAt(clientX, clientY)
+      // Pass fromOverlay through so the ce=true guard only fires while cursor is on the button.
+      probeImageAt(clientX, clientY, false, false, fromOverlay ?? false)
       probeHoverCardsAt(clientX, clientY)
     }
 
@@ -939,16 +1015,31 @@ export function OhhwellsBridge() {
           track.setAttribute('data-ohw-hover-paused', '')
         }
         if (el.dataset.ohwEditable === 'bg-image') {
-          el.style.backgroundImage = `url('${url}')`
           found = true
-          notify()
+          const fadeTarget = el
+          const preload = new Image()
+          preload.onload = () => fadeInBgImage(fadeTarget, url, notify)
+          preload.onerror = () => {
+            fadeTarget.style.backgroundImage = `url('${url}')`
+            notify()
+          }
+          preload.src = url
         } else if (el.dataset.ohwEditable === 'image') {
           const img = el instanceof HTMLImageElement ? el : el.querySelector<HTMLImageElement>('img')
           if (img) {
-            img.onload = notify
-            img.onerror = notify
-            img.src = url
             found = true
+            img.style.opacity = '0'
+            const onReady = () => {
+              img.onload = null
+              img.onerror = null
+              fadeInImageElement(img, notify)
+            }
+            img.onload = onReady
+            img.onerror = onReady
+            img.src = url
+            if (img.complete && img.naturalWidth > 0) {
+              requestAnimationFrame(() => onReady())
+            }
           }
         }
       })
