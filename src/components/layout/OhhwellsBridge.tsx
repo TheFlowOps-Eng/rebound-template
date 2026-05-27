@@ -1,5 +1,7 @@
 'use client'
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+
+const PRIMARY = '#0885FE'
 import { createPortal } from 'react-dom'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { isEditSessionActive } from '@/lib/ohw-session-search'
@@ -59,7 +61,9 @@ function sanitizeHtml(html: string): string {
       if (!SAFE_TAGS.has(el.tagName)) {
         parent.replaceChild(document.createTextNode(el.textContent ?? ''), el)
       } else {
+        const textAlign = (el as HTMLElement).style?.textAlign || el.getAttribute('align') || ''
         for (const attr of Array.from(el.attributes)) el.removeAttribute(attr.name)
+        if (textAlign) (el as HTMLElement).style.textAlign = textAlign
         walk(el)
       }
     }
@@ -202,7 +206,7 @@ function FloatingToolbar({
                   alignItems: 'center',
                   justifyContent: 'center',
                   border: 'none',
-                  background: isActive ? '#0885FE' : 'transparent',
+                  background: isActive ? PRIMARY : 'transparent',
                   borderRadius: 4,
                   cursor: 'pointer',
                   color: isActive ? '#FFFFFF' : '#1C1917',
@@ -566,20 +570,19 @@ export function OhhwellsBridge() {
       [data-ohw-editable="image"], [data-ohw-editable="image"] *,
       [data-ohw-editable="bg-image"], [data-ohw-editable="bg-image"] * { cursor: pointer !important; }
       [data-ohw-hovered]:not([contenteditable]) {
-        outline: 2px dashed #0885FE !important;
+        outline: 2px dashed ${PRIMARY} !important;
         outline-offset: 4px;
         border-radius: 2px;
       }
       [data-ohw-editable][contenteditable] {
         outline: none !important;
-        caret-color: #0885FE;
+        caret-color: ${PRIMARY};
+        cursor: text !important;
       }
       [data-ohw-editable][contenteditable]::selection,
-      [data-ohw-editable][contenteditable] *::selection { background: rgba(8,133,254,0.35) !important; }
+      [data-ohw-editable][contenteditable] *::selection { background: ${PRIMARY}59 !important; }
       [data-ohw-hover-card], [data-ohw-hover-card] * { pointer-events: none !important; }
       [data-ohw-hover-card][data-ohw-force-hover] [data-ohw-editable] { pointer-events: auto !important; }
-      [data-ohw-hover-card][data-ohw-editable="image"],
-      [data-ohw-hover-card][data-ohw-editable="image"] * { pointer-events: auto !important; cursor: pointer !important; }
     `
       const forceHover = document.createElement('style')
       forceHover.setAttribute('data-ohw-force-hover-style', '')
@@ -659,8 +662,29 @@ export function OhhwellsBridge() {
       })
     }
 
+    // Returns the element's rect clipped to any overflow-hidden/clip ancestor boundaries.
+    // Needed when an image (e.g. height:auto logo) overflows a fixed-height container.
+    const getVisibleRect = (el: HTMLElement) => {
+      const r = el.getBoundingClientRect()
+      let top = r.top, left = r.left, bottom = r.bottom, right = r.right
+      let parent = el.parentElement
+      while (parent) {
+        const style = getComputedStyle(parent)
+        if (style.overflowY === 'hidden' || style.overflowY === 'clip' || style.overflowX === 'hidden' || style.overflowX === 'clip') {
+          const pr = parent.getBoundingClientRect()
+          top = Math.max(top, pr.top)
+          bottom = Math.min(bottom, pr.bottom)
+          left = Math.max(left, pr.left)
+          right = Math.min(right, pr.right)
+        }
+        if (parent === document.documentElement) break
+        parent = parent.parentElement
+      }
+      return { top, left, width: Math.max(0, right - left), height: Math.max(0, bottom - top) }
+    }
+
     const postImageHover = (imgEl: HTMLElement, isDragOver = false) => {
-      const r = imgEl.getBoundingClientRect()
+      const r = getVisibleRect(imgEl)
       postToParentRef.current({
         type: 'ow:image-hover',
         key: imgEl.dataset.ohwKey ?? '',
@@ -678,72 +702,65 @@ export function OhhwellsBridge() {
       const matches: HTMLElement[] = []
       for (let i = images.length - 1; i >= 0; i--) {
         const el = images[i]
-        const r = el.getBoundingClientRect()
-        if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) matches.push(el)
+
+        // State-aware filtering: only offer Replace for media that belongs to the active card state.
+        // data-ohw-state="default" → only in default (non-hover) editing
+        // data-ohw-state="hover"   → only in hover editing (data-ohw-force-hover active)
+        // When the image element IS the hover-card itself (base media), treat it as state="default".
+        const ownerCard = el.closest<HTMLElement>('[data-ohw-hover-card]')
+        if (ownerCard) {
+          const inHoverState = ownerCard.hasAttribute('data-ohw-force-hover')
+          const elState = el.dataset.ohwState
+          if (el === ownerCard && inHoverState) continue
+          if (elState === 'default' && inHoverState) continue
+          if (elState === 'hover' && !inHoverState) continue
+        }
+
+        const r = getVisibleRect(el)
+        if (x >= r.left && x <= r.left + r.width && y >= r.top && y <= r.top + r.height) matches.push(el)
       }
       if (matches.length === 0) return null
-      // Always prefer the smallest element so a regular <img> wins over a containing bg-image section
-      const smallest = matches.reduce((best, el) => {
-        const br = best.getBoundingClientRect()
-        const er = el.getBoundingClientRect()
+      // Prefer explicit <img>-type elements over bg-image sections when both overlap at the cursor.
+      // A logo image (e.g. 1100×1107) can be larger by area than its bg-image container (1823×280),
+      // so pure smallest-area would wrongly pick the container. Type priority fixes this.
+      const imageTypeMatches = matches.filter(el => el.dataset.ohwEditable === 'image')
+      const candidatePool = imageTypeMatches.length > 0 ? imageTypeMatches : matches
+      const smallest = candidatePool.reduce((best, el) => {
+        const br = getVisibleRect(best)
+        const er = getVisibleRect(el)
         return er.width * er.height < br.width * br.height ? el : best
       })
-      // Sticky pin only when pinned IS the smallest — prevents flicker between same-size images
-      // but never lets a larger bg-image block a smaller img from being selected
       const pinned = hoveredImageRef.current
-      if (pinned && pinned === smallest && matches.includes(pinned)) return pinned
+      // Only apply sticky if the pinned element is in the same candidate pool.
+      // If pinned is a bg-image but there are now image-type matches, skip sticky so
+      // the more specific image-type element is returned.
+      if (pinned && candidatePool.includes(pinned)) {
+        const pr = getVisibleRect(pinned)
+        const stickyPad = 48
+        const withinPad =
+          x >= pr.left - stickyPad &&
+          x <= pr.left + pr.width + stickyPad &&
+          y >= pr.top - stickyPad &&
+          y <= pr.top + pr.height + stickyPad
+        // Keep pinned while cursor is near it so moving toward the Replace button doesn't switch
+        // to a larger parent (e.g., logo → bg-image). Yield only if a genuinely smaller element
+        // is actually hit (user has moved onto a distinct, more specific image).
+        if (withinPad) {
+          const yieldToSmaller =
+            smallest !== pinned &&
+            candidatePool.includes(smallest) &&
+            (() => {
+              const sr = getVisibleRect(smallest)
+              const pr2 = getVisibleRect(pinned)
+              return sr.width * sr.height < pr2.width * pr2.height
+            })()
+          if (!yieldToSmaller) return pinned
+        }
+      }
       return smallest
     }
 
-    const isPointInImage = (
-      imgEl: HTMLElement,
-      clientX: number,
-      clientY: number,
-      fromParentViewport: boolean,
-      pad = 0,
-    ) => {
-      const { x, y } = toProbeCoords(clientX, clientY, fromParentViewport)
-      const r = imgEl.getBoundingClientRect()
-      return (
-        x >= r.left - pad &&
-        x <= r.right + pad &&
-        y >= r.top - pad &&
-        y <= r.bottom + pad
-      )
-    }
 
-    const probeImageFromParentPointer = (clientX: number, clientY: number) => {
-      // window.frameElement is null in cross-origin iframes — coordinate conversion is impossible.
-      // Native mousemove inside the iframe is the authoritative signal; skip here.
-      const frame = window.frameElement as HTMLElement | null
-      if (!frame) return
-      const fr = frame.getBoundingClientRect()
-      const inFrame =
-        clientX >= fr.left &&
-        clientX <= fr.right &&
-        clientY >= fr.top &&
-        clientY <= fr.bottom
-      if (!inFrame) {
-        if (hoveredImageRef.current) {
-          hoveredImageRef.current = null
-          resumeAnimTracks()
-          postToParentRef.current({ type: 'ow:image-unhover' })
-        }
-        return
-      }
-      const stickyPad = 32
-      const sticky = hoveredImageRef.current
-      if (sticky && isPointInImage(sticky, clientX, clientY, true, stickyPad)) {
-        hoveredImageRef.current = sticky
-        postImageHover(sticky)
-        return
-      }
-      const imgEl = findImageAtPoint(clientX, clientY, true)
-      if (!imgEl) {
-        return
-      }
-      postImageHover(imgEl)
-    }
 
     const probeImageAt = (
       clientX: number,
@@ -751,6 +768,20 @@ export function OhhwellsBridge() {
       isDragOver = false,
       fromParentViewport = false,
     ) => {
+      // If the cursor is over the state toggle, hide the image overlay so the toggle is clickable.
+      const toggleEl = document.querySelector('[data-ohw-state-toggle]')
+      if (toggleEl) {
+        const { x, y } = toProbeCoords(clientX, clientY, fromParentViewport)
+        const tr = toggleEl.getBoundingClientRect()
+        if (x >= tr.left && x <= tr.right && y >= tr.top && y <= tr.bottom) {
+          if (hoveredImageRef.current) {
+            hoveredImageRef.current = null
+            resumeAnimTracks()
+            postToParentRef.current({ type: 'ow:image-unhover' })
+          }
+          return
+        }
+      }
       const imgEl = findImageAtPoint(clientX, clientY, fromParentViewport)
 
       if (imgEl) {
@@ -764,8 +795,13 @@ export function OhhwellsBridge() {
             resumeAnimTracks()
             postToParentRef.current({ type: 'ow:image-unhover' })
           }
+          if (!topEditable.hasAttribute('contenteditable')) {
+            document.querySelectorAll<HTMLElement>('[data-ohw-hovered]').forEach(el => el.removeAttribute('data-ohw-hovered'))
+            topEditable.setAttribute('data-ohw-hovered', '')
+          }
           return
         }
+        document.querySelectorAll<HTMLElement>('[data-ohw-hovered]').forEach(el => el.removeAttribute('data-ohw-hovered'))
         if (activeElRef.current) deactivateRef.current()
         if (imgEl !== hoveredImageRef.current) {
           hoveredImageRef.current = imgEl
@@ -825,17 +861,14 @@ export function OhhwellsBridge() {
       if (e.data?.type !== 'ow:pointer-sync') return
       const { clientX, clientY } = e.data as { clientX?: number; clientY?: number }
       if (typeof clientX !== 'number' || typeof clientY !== 'number') return
-      probeImageFromParentPointer(clientX, clientY)
-      // Skip hover-card probing in cross-origin iframes — window.frameElement is null so
-      // toProbeCoords returns parent-viewport coords unchanged, which are wrong against
-      // iframe-local rects and cause the StateToggle to flash when cursor exits the Replace overlay.
-      if (window.frameElement) {
-        probeHoverCardsAt(clientX, clientY, true)
-      }
+      // Parent now sends iframe-local coords (clientX - iframeRect.left, clientY - iframeRect.top)
+      // so we can call probeImageAt directly — no coordinate conversion needed, works cross-origin.
+      probeImageAt(clientX, clientY)
+      probeHoverCardsAt(clientX, clientY)
     }
 
     const handleDragOver = (e: DragEvent) => {
-      const el = (e.target as HTMLElement).closest<HTMLElement>('[data-ohw-editable="image"], [data-ohw-editable="bg-image"]')
+      const el = findImageAtPoint(e.clientX, e.clientY, false)
       if (!el) return
       e.preventDefault()
       e.dataTransfer!.dropEffect = 'copy'
@@ -848,17 +881,15 @@ export function OhhwellsBridge() {
     }
 
     const handleDragLeave = (e: DragEvent) => {
-      const imgEl = (e.target as HTMLElement).closest<HTMLElement>('[data-ohw-editable="image"], [data-ohw-editable="bg-image"]')
-      if (!imgEl) return
-      // Cursor moved to another child of the same image container — keep the overlay
-      if (e.relatedTarget instanceof Node && imgEl.contains(e.relatedTarget)) return
+      const imgEl = findImageAtPoint(e.clientX, e.clientY, false)
+      if (imgEl) return
       hoveredImageRef.current = null
       resumeAnimTracks()
       postToParentRef.current({ type: 'ow:image-unhover' })
     }
 
     const handleDrop = (e: DragEvent) => {
-      const el = (e.target as HTMLElement).closest<HTMLElement>('[data-ohw-editable="image"], [data-ohw-editable="bg-image"]')
+      const el = findImageAtPoint(e.clientX, e.clientY, false)
       if (!el) return
       e.preventDefault()
       const file = e.dataTransfer?.files?.[0]
@@ -897,6 +928,8 @@ export function OhhwellsBridge() {
             if (!stillHovered) track.removeAttribute('data-ohw-hover-paused')
           }
         })
+        // Reset so the next pointer-sync probe re-fires ow:image-hover for this element.
+        hoveredImageRef.current = null
         postToParentRef.current({ type: 'ow:image-loaded', key })
       }
       let found = false
@@ -1091,9 +1124,15 @@ export function OhhwellsBridge() {
       })
     }
 
+    const handleCanvasHeight = (e: MessageEvent) => {
+      if (e.data?.type !== 'ow:canvas-height' || typeof e.data.height !== 'number') return
+      document.documentElement.style.setProperty('--ohw-canvas-h', `${e.data.height}px`)
+    }
+
     window.addEventListener('message', handleSave)
     window.addEventListener('message', handleImageUrl)
     window.addEventListener('message', handleAnimLock)
+    window.addEventListener('message', handleCanvasHeight)
     window.addEventListener('message', handlePointerSync)
     document.addEventListener('click', handleClick, true)
     document.addEventListener('paste', handlePaste, true)
@@ -1126,6 +1165,7 @@ export function OhhwellsBridge() {
       window.removeEventListener('message', handleSave)
       window.removeEventListener('message', handleImageUrl)
       window.removeEventListener('message', handleAnimLock)
+      window.removeEventListener('message', handleCanvasHeight)
       window.removeEventListener('message', handlePointerSync)
       window.removeEventListener('message', handleHydrate)
       window.removeEventListener('message', handleDeactivate)

@@ -10,7 +10,7 @@ export function Hero({ headline, headlineEm, subhead, cta, background }: Props) 
       data-ohw-key="hero-bg"
       style={{
         position: "relative",
-        minHeight: "100svh",
+        minHeight: "var(--ohw-canvas-h, 100svh)",
         display: "flex",
         backgroundImage: `url('${background}')`,
         backgroundSize: "cover",
