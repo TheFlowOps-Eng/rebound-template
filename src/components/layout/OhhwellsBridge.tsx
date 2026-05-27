@@ -24,9 +24,6 @@ function runOpacityFade(el: HTMLElement, onDone: () => void) {
 
 /** After load: unmount skeleton (onReady), then fade <img> in. */
 function fadeInImageElement(img: HTMLElement, onReady: () => void) {
-  // #region agent log
-  fetch('http://127.0.0.1:7397/ingest/4786e4b5-bf1a-4684-8031-b88d9c0a732f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'e403fd'},body:JSON.stringify({sessionId:'e403fd',location:'OhhwellsBridge:fadeInImageElement',message:'iframe image fade start',data:{src:img.getAttribute('src')?.slice(0,80)},timestamp:Date.now()})}).catch(()=>{});
-  // #endregion
   onReady()
   img.style.opacity = '0'
   runOpacityFade(img, () => {
@@ -54,9 +51,6 @@ function fadeInBgImage(el: HTMLElement, url: string, onReady: () => void) {
   })
   el.prepend(layer)
 
-  // #region agent log
-  fetch('http://127.0.0.1:7397/ingest/4786e4b5-bf1a-4684-8031-b88d9c0a732f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'e403fd'},body:JSON.stringify({sessionId:'e403fd',location:'OhhwellsBridge:fadeInBgImage',message:'iframe bg fade start',timestamp:Date.now()})}).catch(()=>{});
-  // #endregion
   onReady()
 
   runOpacityFade(layer, () => {
