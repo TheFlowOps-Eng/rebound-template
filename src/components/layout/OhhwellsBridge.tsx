@@ -871,6 +871,22 @@ export function OhhwellsBridge() {
           topEditable.setAttribute('data-ohw-hovered', '')
           return
         }
+        // CSS outline (2px + 4px offset = 6px outside border-box) isn't hit-tested by elementFromPoint.
+        // If a text editable is currently showing its outline and cursor is in the outline fringe zone,
+        // keep text priority so the image overlay doesn't bleed through.
+        const activeHovered = document.querySelector<HTMLElement>('[data-ohw-hovered]')
+        if (activeHovered) {
+          const outlinePad = 8
+          const hr = activeHovered.getBoundingClientRect()
+          if (x >= hr.left - outlinePad && x <= hr.right + outlinePad && y >= hr.top - outlinePad && y <= hr.bottom + outlinePad) {
+            if (hoveredImageRef.current) {
+              hoveredImageRef.current = null
+              resumeAnimTracks()
+              postToParentRef.current({ type: 'ow:image-unhover' })
+            }
+            return
+          }
+        }
         document.querySelectorAll<HTMLElement>('[data-ohw-hovered]').forEach(el => el.removeAttribute('data-ohw-hovered'))
         if (imgEl !== hoveredImageRef.current) {
           hoveredImageRef.current = imgEl
