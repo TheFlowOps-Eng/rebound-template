@@ -239,7 +239,7 @@ function Card({ p }: { p: Instructor }) {
   return (
     <article
       className="ig-card"
-      data-ohw-hover-card=""
+      data-ohw-editable-state="hover"
       data-ohw-editable="image"
       data-ohw-key={`${slug}-img`}
       tabIndex={0}
