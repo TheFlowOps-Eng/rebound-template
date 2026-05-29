@@ -1019,9 +1019,7 @@ export function OhhwellsBridge() {
       e.dataTransfer!.dropEffect = 'copy'
       if (hoveredImageRef.current !== el) {
         hoveredImageRef.current = el
-        const r = el.getBoundingClientRect()
-        postToParentRef.current({ type: 'ow:image-hover', key: el.dataset.ohwKey ?? '',
-          rect: { top: r.top, left: r.left, width: r.width, height: r.height }, isDragOver: true })
+        postImageHover(el, true)
       }
     }
 
