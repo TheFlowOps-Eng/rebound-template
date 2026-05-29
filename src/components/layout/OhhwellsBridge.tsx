@@ -84,16 +84,72 @@ function collectEditableNodes(): EditableNode[] {
   })
 }
 
-// Reads all :hover rules from the page's own stylesheets and returns equivalent
-// rules using [data-ohw-force-hover] — so the bridge never hardcodes any values.
-function collectHoverRules(): string {
+const FORCE_PSEUDO_STATES: Array<{ pseudo: string; attr: string }> = [
+  { pseudo: ':hover', attr: 'data-ohw-force-hover' },
+  { pseudo: ':focus', attr: 'data-ohw-force-focus' },
+  { pseudo: ':focus-visible', attr: 'data-ohw-force-focus-visible' },
+  { pseudo: ':active', attr: 'data-ohw-force-active' },
+]
+
+// For a :hover rule, generates a suppressor that freezes affected elements at their
+// current computed values when hovered without [data-ohw-force-hover]. This prevents
+// the native :hover CSS from firing in edit mode without touching the template CSS.
+function buildHoverSuppressor(rule: CSSStyleRule): string | null {
+  const props: string[] = []
+  for (let i = 0; i < rule.style.length; i++) props.push(rule.style.item(i))
+  if (props.length === 0) return null
+
+  const suppressorSelectors: string[] = []
+  for (const sel of rule.selectorText.split(',').map(s => s.trim())) {
+    if (!sel.includes(':hover')) continue
+    const idx = sel.indexOf(':hover')
+    suppressorSelectors.push(
+      sel.slice(0, idx) + '[data-ohw-editable-state]:not([data-ohw-force-hover])' + sel.slice(idx)
+    )
+  }
+  if (suppressorSelectors.length === 0) return null
+
+  // Find a live element matching the descendant part to read its base computed values.
+  // collectStateRules() runs at init / route-change, before the cursor is over any card,
+  // so getComputedStyle reflects the non-hover (base) state.
+  const firstSel = rule.selectorText.split(',')[0].trim()
+  const hoverIdx = firstSel.indexOf(':hover')
+  const descendantPart = firstSel.slice(hoverIdx + ':hover'.length).trim()
+  let targetEl: Element | null = null
+  try {
+    targetEl = descendantPart
+      ? document.querySelector(`[data-ohw-editable-state] ${descendantPart}`)
+      : document.querySelector('[data-ohw-editable-state]')
+  } catch { return null }
+  if (!targetEl) return null
+
+  const cs = getComputedStyle(targetEl as HTMLElement)
+  const decls = props.map(p => `${p}: ${cs.getPropertyValue(p)} !important`).join('; ')
+  return `${suppressorSelectors.join(', ')} { ${decls} }`
+}
+
+// Reads pseudo-state rules from the page's own stylesheets and returns:
+// 1. [data-ohw-force-*] activator rules (replace :hover/:focus etc. with the force attribute)
+// 2. :hover suppressor rules (lock base computed values so native hover can't fire in edit mode)
+// Template CSS needs no modifications — the bridge handles suppression automatically.
+function collectStateRules(): string {
   const lines: string[] = []
   function processRules(rules: CSSRuleList) {
     for (const rule of Array.from(rules)) {
       if (rule instanceof CSSStyleRule) {
-        if (rule.selectorText.includes(':hover')) {
-          lines.push(rule.cssText.replace(/:hover\b/g, '[data-ohw-force-hover]'))
+        let text = rule.cssText
+        let matched = false
+        for (const { pseudo, attr } of FORCE_PSEUDO_STATES) {
+          if (text.includes(pseudo)) {
+            text = text.replace(new RegExp(pseudo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?![\\w-])', 'g'), `[${attr}]`)
+            if (pseudo === ':hover') {
+              const suppressor = buildHoverSuppressor(rule)
+              if (suppressor) lines.push(suppressor)
+            }
+            matched = true
+          }
         }
+        if (matched) lines.push(text)
       } else if ('cssRules' in rule) {
         processRules((rule as CSSMediaRule).cssRules)
       }
@@ -393,7 +449,7 @@ export function OhhwellsBridge() {
 
   const activeElRef = useRef<HTMLElement | null>(null)
   const originalContentRef = useRef<string | null>(null)
-  const hoverCardRef = useRef<HTMLElement | null>(null)
+  const activeStateElRef = useRef<HTMLElement | null>(null)
   const hoveredImageRef = useRef<HTMLElement | null>(null)
   const editStylesRef = useRef<{ base: HTMLStyleElement; forceHover: HTMLStyleElement } | null>(null)
   const activateRef = useRef<(el: HTMLElement) => void>(() => {})
@@ -407,9 +463,9 @@ export function OhhwellsBridge() {
   const [maxBadge, setMaxBadge] = useState<{ rect: DOMRect; current: number; max: number } | null>(null)
   const [activeCommands, setActiveCommands] = useState<Set<string>>(new Set())
 
-  const refreshForceHoverRules = useCallback(() => {
+  const refreshStateRules = useCallback(() => {
     editStylesRef.current?.forceHover &&
-      (editStylesRef.current.forceHover.textContent = collectHoverRules())
+      (editStylesRef.current.forceHover.textContent = collectStateRules())
   }, [])
 
   const deactivate = useCallback(() => {
@@ -638,8 +694,8 @@ export function OhhwellsBridge() {
       }
       [data-ohw-editable][contenteditable]::selection,
       [data-ohw-editable][contenteditable] *::selection { background: ${PRIMARY}59 !important; }
-      [data-ohw-hover-card], [data-ohw-hover-card] * { pointer-events: none !important; }
-      [data-ohw-hover-card][data-ohw-force-hover] [data-ohw-editable] { pointer-events: auto !important; }
+      [data-ohw-editable-state], [data-ohw-editable-state] * { pointer-events: none !important; }
+      [data-ohw-editable-state][data-ohw-force-hover] [data-ohw-editable] { pointer-events: auto !important; }
     `
       const forceHover = document.createElement('style')
       forceHover.setAttribute('data-ohw-force-hover-style', '')
@@ -648,7 +704,7 @@ export function OhhwellsBridge() {
       editStylesRef.current = { base, forceHover }
     }
 
-    refreshForceHoverRules()
+    refreshStateRules()
 
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement
@@ -764,7 +820,7 @@ export function OhhwellsBridge() {
         // data-ohw-state="default" → only in default (non-hover) editing
         // data-ohw-state="hover"   → only in hover editing (data-ohw-force-hover active)
         // When the image element IS the hover-card itself (base media), treat it as state="default".
-        const ownerCard = el.closest<HTMLElement>('[data-ohw-hover-card]')
+        const ownerCard = el.closest<HTMLElement>('[data-ohw-editable-state]')
         if (ownerCard) {
           const inHoverState = ownerCard.hasAttribute('data-ohw-force-hover')
           const elState = el.dataset.ohwState
@@ -871,6 +927,22 @@ export function OhhwellsBridge() {
           topEditable.setAttribute('data-ohw-hovered', '')
           return
         }
+        // CSS outline (2px + 4px offset = 6px outside border-box) isn't hit-tested by elementFromPoint.
+        // If a text editable is currently showing its outline and cursor is in the outline fringe zone,
+        // keep text priority so the image overlay doesn't bleed through.
+        const activeHovered = document.querySelector<HTMLElement>('[data-ohw-hovered]')
+        if (activeHovered) {
+          const outlinePad = 8
+          const hr = activeHovered.getBoundingClientRect()
+          if (x >= hr.left - outlinePad && x <= hr.right + outlinePad && y >= hr.top - outlinePad && y <= hr.bottom + outlinePad) {
+            if (hoveredImageRef.current) {
+              hoveredImageRef.current = null
+              resumeAnimTracks()
+              postToParentRef.current({ type: 'ow:image-unhover' })
+            }
+            return
+          }
+        }
         document.querySelectorAll<HTMLElement>('[data-ohw-hovered]').forEach(el => el.removeAttribute('data-ohw-hovered'))
         if (imgEl !== hoveredImageRef.current) {
           hoveredImageRef.current = imgEl
@@ -901,18 +973,18 @@ export function OhhwellsBridge() {
         }
       }
 
-      const cards = Array.from(document.querySelectorAll<HTMLElement>('[data-ohw-hover-card]'))
+      const cards = Array.from(document.querySelectorAll<HTMLElement>('[data-ohw-editable-state]'))
       const found = cards.find((card) => {
         const r = card.getBoundingClientRect()
         return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom
       }) ?? null
 
-      const currentLocked = hoverCardRef.current?.hasAttribute('data-ohw-force-hover')
-        ? hoverCardRef.current
+      const currentLocked = activeStateElRef.current?.hasAttribute('data-ohw-force-hover')
+        ? activeStateElRef.current
         : null
       const active = found ?? currentLocked
 
-      hoverCardRef.current = active
+      activeStateElRef.current = active
       if (active) {
         setToggleState({ rect: active.getBoundingClientRect(), isLocked: active.hasAttribute('data-ohw-force-hover') })
       } else {
@@ -938,15 +1010,16 @@ export function OhhwellsBridge() {
     }
 
     const handleDragOver = (e: DragEvent) => {
-      const el = findImageAtPoint(e.clientX, e.clientY, false)
-      if (!el) return
       e.preventDefault()
+      const el = findImageAtPoint(e.clientX, e.clientY, false)
+      if (!el) {
+        if (e.dataTransfer) e.dataTransfer.dropEffect = 'none'
+        return
+      }
       e.dataTransfer!.dropEffect = 'copy'
       if (hoveredImageRef.current !== el) {
         hoveredImageRef.current = el
-        const r = el.getBoundingClientRect()
-        postToParentRef.current({ type: 'ow:image-hover', key: el.dataset.ohwKey ?? '',
-          rect: { top: r.top, left: r.left, width: r.width, height: r.height }, isDragOver: true })
+        postImageHover(el, true)
       }
     }
 
@@ -959,9 +1032,9 @@ export function OhhwellsBridge() {
     }
 
     const handleDrop = (e: DragEvent) => {
+      e.preventDefault()
       const el = findImageAtPoint(e.clientX, e.clientY, false)
       if (!el) return
-      e.preventDefault()
       const file = e.dataTransfer?.files?.[0]
       if (file) {
         if (file.type.startsWith('image/')) {
@@ -1145,8 +1218,8 @@ export function OhhwellsBridge() {
         setToolbarRect(r)
         setMaxBadge((prev) => (prev ? { ...prev, rect: r } : null))
       }
-      if (hoverCardRef.current) {
-        const rect = hoverCardRef.current.getBoundingClientRect()
+      if (activeStateElRef.current) {
+        const rect = activeStateElRef.current.getBoundingClientRect()
         setToggleState((prev) => (prev ? { ...prev, rect } : null))
       }
       if (hoveredImageRef.current) {
@@ -1257,7 +1330,7 @@ export function OhhwellsBridge() {
       autoSaveTimers.current.forEach(clearTimeout)
       autoSaveTimers.current.clear()
     }
-  }, [isEditMode, refreshForceHoverRules])
+  }, [isEditMode, refreshStateRules])
 
   // On route change: refresh hover CSS, reset card state, notify parent
   useEffect(() => {
@@ -1266,13 +1339,13 @@ export function OhhwellsBridge() {
     document.querySelectorAll('[data-ohw-force-hover]').forEach((el) => {
       el.removeAttribute('data-ohw-force-hover')
     })
-    hoverCardRef.current = null
+    activeStateElRef.current = null
     setToggleState(null)
-    refreshForceHoverRules()
+    refreshStateRules()
 
-    const raf = requestAnimationFrame(() => refreshForceHoverRules())
+    const raf = requestAnimationFrame(() => refreshStateRules())
     const timer = setTimeout(() => {
-      refreshForceHoverRules()
+      refreshStateRules()
       postToParent({ type: 'ow:ready', version: '1', nodes: collectEditableNodes() })
     }, 150)
 
@@ -1280,7 +1353,7 @@ export function OhhwellsBridge() {
       cancelAnimationFrame(raf)
       clearTimeout(timer)
     }
-  }, [pathname, isEditMode, refreshForceHoverRules, postToParent])
+  }, [pathname, isEditMode, refreshStateRules, postToParent])
 
   const handleCommand = useCallback((cmd: string) => {
     document.execCommand(cmd, false)
@@ -1291,14 +1364,14 @@ export function OhhwellsBridge() {
 
   const handleDefaultState = useCallback(() => {
     deactivate()
-    if (!hoverCardRef.current) return
-    hoverCardRef.current.removeAttribute('data-ohw-force-hover')
+    if (!activeStateElRef.current) return
+    activeStateElRef.current.removeAttribute('data-ohw-force-hover')
     setToggleState((prev) => (prev ? { ...prev, isLocked: false } : null))
   }, [deactivate])
 
   const handleHoverState = useCallback(() => {
-    if (!hoverCardRef.current) return
-    hoverCardRef.current.setAttribute('data-ohw-force-hover', '')
+    if (!activeStateElRef.current) return
+    activeStateElRef.current.setAttribute('data-ohw-force-hover', '')
     setToggleState((prev) => (prev ? { ...prev, isLocked: true } : null))
   }, [])
 
