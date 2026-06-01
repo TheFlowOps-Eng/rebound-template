@@ -1,0 +1,43 @@
+@import "tailwindcss/theme";
+@import "tailwindcss/utilities";
+
+@source "../../**/*.{tsx,ts}";
+
+@theme {
+  /* spacing: 4px base so py-1=4px, px-2=8px, gap-1=4px, p-1=4px — all px, not rem */
+  --spacing: 4px;
+
+  /* border radius */
+  --radius-md: 6px;
+
+  /* text-sm: 14px/20px (Figma: text-sm/leading-5/medium) */
+  --text-sm: 14px;
+  --text-sm--line-height: 20px;
+
+  /* font */
+  --font-sans: "Figtree", sans-serif;
+
+  /* colors */
+  --color-background: #FFFFFF;
+  --color-foreground: #0C0A09;
+  --color-muted: #F5F5F4;
+  --color-muted-foreground: #78716C;
+
+  /* Figma: shadows/shadow-sm */
+  --shadow-sm: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+
+  /* No Figma token — custom popover shadow. Confirm or replace with design token when available. */
+  --shadow-popover: 0px 1px 3px rgba(0, 0, 0, 0.1), 0px 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+@layer base {
+  [data-ohw-bridge-root] button {
+    border: none;
+    background: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    cursor: pointer;
+    appearance: none;
+  }
+}

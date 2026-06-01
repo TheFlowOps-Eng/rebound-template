@@ -1,5 +1,7 @@
 'use client'
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import './bridge.css'
 
 const PRIMARY = '#0885FE'
 const IMAGE_FADE_MS = 300
@@ -84,15 +86,15 @@ function collectEditableNodes(): EditableNode[] {
   })
 }
 
-const FORCE_PSEUDO_STATES: Array<{ pseudo: string; attr: string }> = [
-  { pseudo: ':hover', attr: 'data-ohw-force-hover' },
-  { pseudo: ':focus', attr: 'data-ohw-force-focus' },
-  { pseudo: ':focus-visible', attr: 'data-ohw-force-focus-visible' },
-  { pseudo: ':active', attr: 'data-ohw-force-active' },
+const FORCE_PSEUDO_STATES: Array<{ pseudo: string; state: string }> = [
+  { pseudo: ':hover', state: 'hover' },
+  { pseudo: ':focus', state: 'focus' },
+  { pseudo: ':focus-visible', state: 'focus-visible' },
+  { pseudo: ':active', state: 'active' },
 ]
 
 // For a :hover rule, generates a suppressor that freezes affected elements at their
-// current computed values when hovered without [data-ohw-force-hover]. This prevents
+// current computed values when not in hover state. This prevents
 // the native :hover CSS from firing in edit mode without touching the template CSS.
 function buildHoverSuppressor(rule: CSSStyleRule): string | null {
   const props: string[] = []
@@ -104,7 +106,7 @@ function buildHoverSuppressor(rule: CSSStyleRule): string | null {
     if (!sel.includes(':hover')) continue
     const idx = sel.indexOf(':hover')
     suppressorSelectors.push(
-      sel.slice(0, idx) + '[data-ohw-editable-state]:not([data-ohw-force-hover])' + sel.slice(idx)
+      sel.slice(0, idx) + '[data-ohw-editable-state]:not([data-ohw-active-state="hover"])' + sel.slice(idx)
     )
   }
   if (suppressorSelectors.length === 0) return null
@@ -128,6 +130,18 @@ function buildHoverSuppressor(rule: CSSStyleRule): string | null {
   return `${suppressorSelectors.join(', ')} { ${decls} }`
 }
 
+function applyStateViews(container: HTMLElement, state: string) {
+  container.querySelectorAll<HTMLElement>('[data-ohw-state-view]').forEach((view) => {
+    view.style.display = view.getAttribute('data-ohw-state-view') === state ? 'block' : 'none'
+  })
+}
+
+function resetStateViews() {
+  document.querySelectorAll<HTMLElement>('[data-ohw-state-view]').forEach((el) => {
+    el.style.display = ''
+  })
+}
+
 // Reads pseudo-state rules from the page's own stylesheets and returns:
 // 1. [data-ohw-force-*] activator rules (replace :hover/:focus etc. with the force attribute)
 // 2. :hover suppressor rules (lock base computed values so native hover can't fire in edit mode)
@@ -139,9 +153,9 @@ function collectStateRules(): string {
       if (rule instanceof CSSStyleRule) {
         let text = rule.cssText
         let matched = false
-        for (const { pseudo, attr } of FORCE_PSEUDO_STATES) {
+        for (const { pseudo, state } of FORCE_PSEUDO_STATES) {
           if (text.includes(pseudo)) {
-            text = text.replace(new RegExp(pseudo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?![\\w-])', 'g'), `[${attr}]`)
+            text = text.replace(new RegExp(pseudo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?![\\w-])', 'g'), `[data-ohw-active-state="${state}"]`)
             if (pseudo === ':hover') {
               const suppressor = buildHoverSuppressor(rule)
               if (suppressor) lines.push(suppressor)
@@ -348,77 +362,45 @@ function FloatingToolbar({
   )
 }
 
-const TOGGLE_BTN_BASE: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: '0 10px',
-  height: 28,
-  border: 'none',
-  borderRadius: 4,
-  cursor: 'pointer',
-  fontFamily: 'sans-serif',
-  fontSize: 13,
-  fontWeight: 500,
-  color: '#0C0A09',
-  whiteSpace: 'nowrap',
-  transition: 'opacity 120ms, background 120ms, box-shadow 120ms',
+// State preview pattern:
+// - Pseudo-class states: data-ohw-editable-state="hover" — bridge forces via CSS injection + data-ohw-active-state attr
+// - Non-pseudo states (future): parent wrapper + children with data-ohw-state="success|error|default"
+function deriveStates(attr: string): string[] {
+  if (!attr) return []
+  return ['Default', ...attr.split(',').map((s) => s.trim().charAt(0).toUpperCase() + s.trim().slice(1))]
 }
 
 function StateToggle({
   rect,
-  isLocked,
-  onDefault,
-  onHover,
+  activeState,
+  states,
+  onStateChange,
 }: {
   rect: DOMRect
-  isLocked: boolean
-  onDefault: () => void
-  onHover: () => void
+  activeState: string
+  states: string[]
+  onStateChange: (state: string) => void
 }) {
-  return createPortal(
-    <div
+  return (
+    <ToggleGroup
       data-ohw-state-toggle=""
+      data-ohw-bridge=""
+      value={activeState}
+      onValueChange={onStateChange}
+      onMouseDown={(e: React.MouseEvent) => e.preventDefault()}
+      className="fixed z-2147483647 pointer-events-auto shadow-popover"
       style={{
-        position: 'fixed',
         top: rect.top + 8,
         left: rect.right - 8,
         transform: 'translateX(-100%)',
-        zIndex: 2147483647,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 2,
-        padding: 4,
-        background: '#F5F5F4',
-        borderRadius: 6,
-        boxShadow: '0px 1px 3px rgba(0,0,0,.1),0px 1px 2px rgba(0,0,0,.06)',
-        pointerEvents: 'auto',
       }}
     >
-      <button
-        onMouseDown={(e) => { e.preventDefault(); onDefault() }}
-        style={{
-          ...TOGGLE_BTN_BASE,
-          background: !isLocked ? '#FFFFFF' : 'transparent',
-          opacity: !isLocked ? 1 : 0.5,
-          boxShadow: !isLocked ? '0px 1px 2px rgba(0,0,0,.08)' : 'none',
-        }}
-      >
-        Default
-      </button>
-      <button
-        onMouseDown={(e) => { e.preventDefault(); onHover() }}
-        style={{
-          ...TOGGLE_BTN_BASE,
-          background: isLocked ? '#FFFFFF' : 'transparent',
-          opacity: isLocked ? 1 : 0.5,
-          boxShadow: isLocked ? '0px 1px 2px rgba(0,0,0,.08)' : 'none',
-        }}
-      >
-        Hover
-      </button>
-    </div>,
-    document.body,
+      {states.map((state) => (
+        <ToggleGroupItem key={state} value={state}>
+          {state}
+        </ToggleGroupItem>
+      ))}
+    </ToggleGroup>
   )
 }
 
@@ -429,6 +411,25 @@ export function OhhwellsBridge() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const isEditMode = isEditSessionActive()
+
+  useEffect(() => {
+    if (!isEditMode) return
+    const preconnect1 = Object.assign(document.createElement('link'), { rel: 'preconnect', href: 'https://fonts.googleapis.com' })
+    const preconnect2 = Object.assign(document.createElement('link'), { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: '' })
+    const stylesheet = Object.assign(document.createElement('link'), { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap' })
+    document.head.append(preconnect1, preconnect2, stylesheet)
+    return () => { preconnect1.remove(); preconnect2.remove(); stylesheet.remove() }
+  }, [isEditMode])
+
+  const [bridgeRoot, setBridgeRoot] = useState<HTMLElement | null>(null)
+  useEffect(() => {
+    const el = document.createElement('div')
+    el.setAttribute('data-ohw-bridge-root', '')
+    el.className = 'font-sans'
+    document.body.appendChild(el)
+    setBridgeRoot(el)
+    return () => { el.remove() }
+  }, [])
 
   const subdomainFromQuery = searchParams.get('subdomain')
   const subdomain = subdomainFromQuery ?? (() => {
@@ -451,7 +452,7 @@ export function OhhwellsBridge() {
   const originalContentRef = useRef<string | null>(null)
   const activeStateElRef = useRef<HTMLElement | null>(null)
   const hoveredImageRef = useRef<HTMLElement | null>(null)
-  const editStylesRef = useRef<{ base: HTMLStyleElement; forceHover: HTMLStyleElement } | null>(null)
+  const editStylesRef = useRef<{ base: HTMLStyleElement; forceHover: HTMLStyleElement; stateViews: HTMLStyleElement } | null>(null)
   const activateRef = useRef<(el: HTMLElement) => void>(() => {})
   const deactivateRef = useRef<() => void>(() => {})
   const refreshActiveCommandsRef = useRef<() => void>(() => {})
@@ -459,7 +460,7 @@ export function OhhwellsBridge() {
   postToParentRef.current = postToParent
 
   const [toolbarRect, setToolbarRect] = useState<DOMRect | null>(null)
-  const [toggleState, setToggleState] = useState<{ rect: DOMRect; isLocked: boolean } | null>(null)
+  const [toggleState, setToggleState] = useState<{ rect: DOMRect; activeState: string; states: string[] } | null>(null)
   const [maxBadge, setMaxBadge] = useState<{ rect: DOMRect; current: number; max: number } | null>(null)
   const [activeCommands, setActiveCommands] = useState<Set<string>>(new Set())
 
@@ -657,6 +658,7 @@ export function OhhwellsBridge() {
     if (!isEditMode) {
       editStylesRef.current?.base.remove()
       editStylesRef.current?.forceHover.remove()
+      editStylesRef.current?.stateViews.remove()
       editStylesRef.current = null
       return
     }
@@ -695,13 +697,24 @@ export function OhhwellsBridge() {
       [data-ohw-editable][contenteditable]::selection,
       [data-ohw-editable][contenteditable] *::selection { background: ${PRIMARY}59 !important; }
       [data-ohw-editable-state], [data-ohw-editable-state] * { pointer-events: none !important; }
-      [data-ohw-editable-state][data-ohw-force-hover] [data-ohw-editable] { pointer-events: auto !important; }
+      [data-ohw-editable-state][data-ohw-active-state] [data-ohw-editable] { pointer-events: auto !important; }
     `
       const forceHover = document.createElement('style')
-      forceHover.setAttribute('data-ohw-force-hover-style', '')
+      forceHover.setAttribute('data-ohw-active-state-style', '')
+
+      const stateViews = document.createElement('style')
+      stateViews.setAttribute('data-ohw-state-views-style', '')
+      stateViews.textContent = `
+        [data-ohw-state-view]:not([data-ohw-state-view="default"]) { display: none; }
+        [data-ohw-state-view="default"] [data-ohw-editable] { pointer-events: auto !important; }
+        [data-ohw-state-hovered] { outline: 2px dashed ${PRIMARY} !important; outline-offset: 4px; border-radius: 2px; }
+        [data-ohw-state-hovered]:has([data-ohw-hovered]) { outline: none !important; }
+      `
+
       document.head.appendChild(base)
       document.head.appendChild(forceHover)
-      editStylesRef.current = { base, forceHover }
+      document.head.appendChild(stateViews)
+      editStylesRef.current = { base, forceHover, stateViews }
     }
 
     refreshStateRules()
@@ -818,11 +831,11 @@ export function OhhwellsBridge() {
 
         // State-aware filtering: only offer Replace for media that belongs to the active card state.
         // data-ohw-state="default" → only in default (non-hover) editing
-        // data-ohw-state="hover"   → only in hover editing (data-ohw-force-hover active)
+        // data-ohw-state="hover"   → only in hover editing (data-ohw-active-state="hover")
         // When the image element IS the hover-card itself (base media), treat it as state="default".
         const ownerCard = el.closest<HTMLElement>('[data-ohw-editable-state]')
         if (ownerCard) {
-          const inHoverState = ownerCard.hasAttribute('data-ohw-force-hover')
+          const inHoverState = ownerCard.getAttribute('data-ohw-active-state') === 'hover'
           const elState = el.dataset.ohwState
           if (el === ownerCard && inHoverState) continue
           if (elState === 'default' && inHoverState) continue
@@ -979,14 +992,18 @@ export function OhhwellsBridge() {
         return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom
       }) ?? null
 
-      const currentLocked = activeStateElRef.current?.hasAttribute('data-ohw-force-hover')
+      const currentLocked = activeStateElRef.current?.hasAttribute('data-ohw-active-state')
         ? activeStateElRef.current
         : null
       const active = found ?? currentLocked
 
       activeStateElRef.current = active
+      document.querySelectorAll<HTMLElement>('[data-ohw-state-hovered]').forEach(el => el.removeAttribute('data-ohw-state-hovered'))
       if (active) {
-        setToggleState({ rect: active.getBoundingClientRect(), isLocked: active.hasAttribute('data-ohw-force-hover') })
+        if (active.querySelector('[data-ohw-state-view]')) active.setAttribute('data-ohw-state-hovered', '')
+        const states = deriveStates(active.dataset.ohwEditableState ?? '')
+        const activeState = active.hasAttribute('data-ohw-active-state') ? (active.getAttribute('data-ohw-active-state') ?? 'Default').charAt(0).toUpperCase() + (active.getAttribute('data-ohw-active-state') ?? '').slice(1) : 'Default'
+        setToggleState({ rect: active.getBoundingClientRect(), activeState, states })
       } else {
         setToggleState(null)
       }
@@ -1268,6 +1285,10 @@ export function OhhwellsBridge() {
     // and posting the message causes a race where the overlay flickers when cursor moves to the Replace button.
     const handleDocMouseLeave = () => {
       hoveredImageRef.current = null
+      document.querySelectorAll<HTMLElement>('[data-ohw-state-hovered]').forEach(el => el.removeAttribute('data-ohw-state-hovered'))
+      document.querySelectorAll<HTMLElement>('[data-ohw-hovered]').forEach(el => el.removeAttribute('data-ohw-hovered'))
+      activeStateElRef.current = null
+      setToggleState(null)
     }
 
     const handleAnimLock = (e: MessageEvent) => {
@@ -1336,8 +1357,12 @@ export function OhhwellsBridge() {
   useEffect(() => {
     if (!isEditMode) return
 
-    document.querySelectorAll('[data-ohw-force-hover]').forEach((el) => {
-      el.removeAttribute('data-ohw-force-hover')
+    document.querySelectorAll('[data-ohw-active-state]').forEach((el) => {
+      el.removeAttribute('data-ohw-active-state')
+    })
+    resetStateViews()
+    document.querySelectorAll<HTMLElement>('[data-ohw-editable-state]').forEach((el) => {
+      if (el.querySelector('[data-ohw-state-view]')) applyStateViews(el, 'default')
     })
     activeStateElRef.current = null
     setToggleState(null)
@@ -1362,29 +1387,29 @@ export function OhhwellsBridge() {
     refreshActiveCommandsRef.current()
   }, [])
 
-  const handleDefaultState = useCallback(() => {
-    deactivate()
+  const handleStateChange = useCallback((state: string) => {
     if (!activeStateElRef.current) return
-    activeStateElRef.current.removeAttribute('data-ohw-force-hover')
-    setToggleState((prev) => (prev ? { ...prev, isLocked: false } : null))
+    const el = activeStateElRef.current
+    if (state === 'Default') {
+      deactivate()
+      el.removeAttribute('data-ohw-active-state')
+      applyStateViews(el, 'default')
+    } else {
+      el.setAttribute('data-ohw-active-state', state.toLowerCase())
+      applyStateViews(el, state.toLowerCase())
+    }
+    setToggleState((prev) => (prev ? { ...prev, activeState: state } : null))
   }, [deactivate])
 
-  const handleHoverState = useCallback(() => {
-    if (!activeStateElRef.current) return
-    activeStateElRef.current.setAttribute('data-ohw-force-hover', '')
-    setToggleState((prev) => (prev ? { ...prev, isLocked: true } : null))
-  }, [])
-
-  return (
+  return bridgeRoot ? createPortal(
     <>
-      {toolbarRect && createPortal(
+      {toolbarRect && (
         <>
           <GlowFrame rect={toolbarRect} />
           <FloatingToolbar rect={toolbarRect} onCommand={handleCommand} activeCommands={activeCommands} />
-        </>,
-        document.body,
+        </>
       )}
-      {maxBadge && createPortal(
+      {maxBadge && (
         <div
           data-ohw-max-badge=""
           style={{
@@ -1399,23 +1424,22 @@ export function OhhwellsBridge() {
             borderRadius: 4,
             padding: '2px 6px',
             fontSize: 11,
-            fontFamily: 'sans-serif',
             fontWeight: 500,
             pointerEvents: 'none',
           }}
         >
           {maxBadge.current}/{maxBadge.max}
-        </div>,
-        document.body,
+        </div>
       )}
       {toggleState && (
         <StateToggle
           rect={toggleState.rect}
-          isLocked={toggleState.isLocked}
-          onDefault={handleDefaultState}
-          onHover={handleHoverState}
+          activeState={toggleState.activeState}
+          states={toggleState.states}
+          onStateChange={handleStateChange}
         />
       )}
-    </>
-  )
+    </>,
+    bridgeRoot,
+  ) : null
 }
