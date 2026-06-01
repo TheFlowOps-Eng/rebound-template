@@ -20,12 +20,14 @@ A **unique string identifier** for each editable node. This is the key used to s
 - Keys are **stable** — changing a key after deployment loses saved content for that node
 
 ### `data-ohw-editable`
-Marks the element as editable in the canvas editor. Two modes:
+Marks the element as editable in the canvas editor. Four modes:
 
 | Value | Behavior |
 |-------|----------|
 | `"text"` | Rich text — bold, italic, alignment, lists allowed |
 | `"plain"` | Plain text only — no formatting, saves `innerText` |
+| `"image"` | Replaces an `<img>` element's `src` via file upload |
+| `"bg-image"` | Replaces a container's `backgroundImage` CSS via file upload |
 
 ```html
 <!-- Rich text (headings, descriptions) -->
@@ -37,9 +39,26 @@ Marks the element as editable in the canvas editor. Two modes:
 <button data-ohw-key="cta-label" data-ohw-editable="plain">
   Book Now
 </button>
+
+<!-- Image replacement -->
+<img
+  data-ohw-key="hero-photo"
+  data-ohw-editable="image"
+  src="/hero.jpg"
+  alt="Studio"
+/>
+
+<!-- Background image replacement -->
+<header
+  data-ohw-key="instructors-header-bg"
+  data-ohw-editable="bg-image"
+  style="background-image: url('/header-bg.jpg')"
+>
+  ...
+</header>
 ```
 
-Both attributes must be on the **same element**.
+Both `data-ohw-key` and `data-ohw-editable` must be on the **same element**.
 
 ---
 
@@ -59,64 +78,115 @@ Recommended limits:
 - Subtitles — `120–160`
 - Body paragraphs — omit (no limit)
 
-### `data-ohw-hover-card`
-Marks a component that has a visible hover state (e.g. a card or button with a `:hover` style). The editor adds a **Default / Hover** toggle so the studio owner can preview and edit both states.
+---
+
+## State-based components
+
+Some components have multiple visual states — a form can be in `default`, `success`, or `error` state; a card can be in `default` or `hover` state. The canvas editor lets studio owners preview and edit **each state independently** via a state toggle that appears when hovering the component.
+
+### `data-ohw-editable-state`
+Place this on the **parent container** of a multi-state component. The value is a comma-separated list of the non-default states the component supports.
 
 ```html
-<div data-ohw-hover-card class="pricing-card">
+<!-- Form with success and error states -->
+<div data-ohw-editable-state="success,error">
+  ...
+</div>
+
+<!-- Card with a hover state -->
+<div data-ohw-editable-state="hover">
   ...
 </div>
 ```
 
-No value needed — presence of the attribute is enough.
+The `default` state is always implied — you don't need to list it.
 
-#### How it works
+### `data-ohw-state-view`
+Place this on the **direct children** of the state container, one per state. Each wrapper shows/hides as the studio owner switches states in the editor.
 
-When the studio owner's cursor enters a `[data-ohw-hover-card]` element, a small **Default / Hover** pill appears in the top-right corner of the card:
+```html
+<div data-ohw-editable-state="success,error">
 
-- **Default** — shows the card as it appears normally (no hover styles applied)
-- **Hover** — locks the card in its hover state so the owner can read and edit the hover-state content without holding the mouse over it
+  <div data-ohw-state-view="default">
+    <!-- Content shown in normal (live) mode -->
+    <form>...</form>
+  </div>
 
-The bridge automatically reads all `:hover` CSS rules from the template's stylesheets and replays them using a `[data-ohw-force-hover]` attribute — so you don't need to duplicate any styles. Just write normal `:hover` CSS and the editor picks it up.
+  <div data-ohw-state-view="success">
+    <!-- Editable success message -->
+    <h2 data-ohw-key="contact-success-title" data-ohw-editable="text">
+      Message sent!
+    </h2>
+    <p data-ohw-key="contact-success-body" data-ohw-editable="text">
+      We'll be in touch soon.
+    </p>
+  </div>
+
+  <div data-ohw-state-view="error">
+    <!-- Editable error message -->
+    <h2 data-ohw-key="contact-error-title" data-ohw-editable="text">
+      Something went wrong
+    </h2>
+    <p data-ohw-key="contact-error-body" data-ohw-editable="text">
+      Please try again or contact us directly.
+    </p>
+  </div>
+
+</div>
+```
+
+#### Live-mode visibility
+
+Use the HTML `hidden` attribute to control which state is shown in live mode (not the editor). The bridge ignores `hidden` in edit mode and manages visibility itself.
+
+```html
+<!-- Default state: visible when form hasn't been submitted -->
+<div data-ohw-state-view="default" hidden={sent}>...</div>
+
+<!-- Success state: visible after successful submission -->
+<div data-ohw-state-view="success" hidden={!sent}>...</div>
+
+<!-- Error state: always hidden by default in live mode -->
+<div data-ohw-state-view="error" hidden>...</div>
+```
+
+#### How the editor toggle works
+
+When the studio owner hovers the component, a pill appears in the top-right corner listing all states (e.g. **Default / Success / Error**). Clicking a state:
+1. Shows only that state's `data-ohw-state-view` wrapper
+2. Hides all others
+3. Makes editable elements inside that state fully clickable
+
+When the studio owner moves their cursor away, the component resets to `default`.
+
+#### Pseudo-state (hover/focus) support
+
+For components with CSS `:hover` or `:focus` states, use `"hover"` or `"focus"` as the state name. The bridge automatically reads `:hover`/`:focus` CSS rules from your stylesheets and replays them using a `[data-ohw-active-state]` attribute — no style duplication needed.
+
+```html
+<div data-ohw-editable-state="hover" class="pricing-card">
+  <div data-ohw-state-view="default">
+    <h3 data-ohw-key="pricing-title" data-ohw-editable="plain">Studio Pass</h3>
+  </div>
+  <div data-ohw-state-view="hover">
+    <h3 data-ohw-key="pricing-title-hover" data-ohw-editable="plain">Studio Pass</h3>
+  </div>
+</div>
+```
 
 ```css
-/* Write your hover styles normally — the editor handles the rest */
+/* Write hover styles normally — the editor picks them up */
 .pricing-card:hover {
   background: #1a1a1a;
   color: #ffffff;
 }
-
-.pricing-card:hover .card-title {
-  color: #0885FE;
-}
-```
-
-#### Editable content inside hover cards
-
-Editable elements inside a hover card work exactly the same way — they just need `data-ohw-key` and `data-ohw-editable`. The studio owner switches to Hover state first, then clicks the element to edit it.
-
-```html
-<div data-ohw-hover-card class="pricing-card">
-  <h3
-    data-ohw-key="pricing-card-title"
-    data-ohw-editable="plain"
-    data-ohw-max-length="40"
-  >
-    Studio Pass
-  </h3>
-  <p
-    data-ohw-key="pricing-card-desc"
-    data-ohw-editable="text"
-  >
-    Unlimited classes, cancel anytime.
-  </p>
-</div>
 ```
 
 #### Limitations
 
-- Only CSS `:hover` rules from the template's own stylesheets are picked up — inline `onMouseEnter` / `onMouseLeave` JS handlers are not replayed
-- Nested `[data-ohw-hover-card]` elements are not supported — only the outermost card gets the toggle
+- Only CSS `:hover`/`:focus` rules from the template's own stylesheets are replayed — inline `onMouseEnter`/`onMouseLeave` JS handlers are not
+- Nested `[data-ohw-editable-state]` elements are not supported — only the outermost container gets the toggle
+- All three attributes (`data-ohw-editable-state`, `data-ohw-state-view`, `data-ohw-key`) must be present for the state system to work
 
 ---
 
@@ -150,20 +220,44 @@ Editable elements inside a hover card work exactly the same way — they just ne
   </a>
 </section>
 
-<div data-ohw-hover-card class="feature-card">
-  <h3
-    data-ohw-key="feature-1-title"
-    data-ohw-editable="plain"
-    data-ohw-max-length="50"
-  >
-    Morning Flow
-  </h3>
-  <p
-    data-ohw-key="feature-1-desc"
-    data-ohw-editable="text"
-  >
-    Start your day with intention.
-  </p>
+<!-- Contact form with state editing -->
+<div data-ohw-editable-state="success,error">
+  <div data-ohw-state-view="default">
+    <form>
+      <input data-ohw-key="contact-label-name" ... />
+      <button type="submit">Send Message</button>
+    </form>
+  </div>
+
+  <div data-ohw-state-view="success">
+    <h2 data-ohw-key="contact-success-title" data-ohw-editable="text">
+      Message sent!
+    </h2>
+    <p data-ohw-key="contact-success-body" data-ohw-editable="text">
+      We'll be in touch soon.
+    </p>
+  </div>
+
+  <div data-ohw-state-view="error">
+    <h2 data-ohw-key="contact-error-title" data-ohw-editable="text">
+      Something went wrong
+    </h2>
+    <p data-ohw-key="contact-error-body" data-ohw-editable="text">
+      Please try again.
+    </p>
+  </div>
+</div>
+
+<!-- Hover-state card -->
+<div data-ohw-editable-state="hover" class="feature-card">
+  <div data-ohw-state-view="default">
+    <h3 data-ohw-key="feature-1-title" data-ohw-editable="plain">Morning Flow</h3>
+    <p data-ohw-key="feature-1-desc" data-ohw-editable="text">Start your day with intention.</p>
+  </div>
+  <div data-ohw-state-view="hover">
+    <h3 data-ohw-key="feature-1-title-hover" data-ohw-editable="plain">Morning Flow</h3>
+    <p data-ohw-key="feature-1-desc-hover" data-ohw-editable="text">Start your day with intention.</p>
+  </div>
 </div>
 ```
 
@@ -176,6 +270,7 @@ Editable elements inside a hover card work exactly the same way — they just ne
 3. **Don't put editable elements inside other editable elements** — nested editables are not supported
 4. **Don't rely on inline styles for text content** — the editor saves/restores `innerHTML`, so formatting applied via CSS classes is fine, but inline `style` attributes on the editable element may be overwritten
 5. **Use semantic HTML inside editable containers** — the sanitizer allows `b`, `i`, `u`, `s`, `strong`, `em`, `br`, `p`, `div`, `span`, `ol`, `ul`, `li`
+6. **Always render all state views in the DOM** — don't use React conditional rendering (`{condition && <div>`) for state views; render all states and use the `hidden` attribute for live-mode visibility
 
 ---
 
@@ -189,3 +284,5 @@ NEXT_PUBLIC_SITE_URL=          # Public URL of this deployed site (e.g. https://
 ```
 
 These are set automatically when deploying via `ohhwells deploy` — no manual config needed.
+
+> **Note:** `NEXT_PUBLIC_SITE_URL` is set once at the project level and must not be overwritten by user deployments. The bridge reads the current hostname at runtime to identify the site — do not hardcode this value.
