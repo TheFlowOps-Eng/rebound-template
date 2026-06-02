@@ -233,10 +233,11 @@ const TOOLBAR_GROUPS: Array<Array<{ cmd: string; title: string }>> = [
   ],
 ]
 
-function GlowFrame({ rect }: { rect: DOMRect }) {
+function GlowFrame({ rect, elRef }: { rect: DOMRect; elRef: React.RefObject<HTMLDivElement | null> }) {
   const GAP = 6
   return (
     <div
+      ref={elRef}
       style={{
         position: 'fixed',
         top: rect.top - GAP,
@@ -253,48 +254,60 @@ function GlowFrame({ rect }: { rect: DOMRect }) {
   )
 }
 
+type ParentScroll = { iframeOffsetTop: number; headerH: number; canvasH: number }
+
+function calcToolbarPos(rect: DOMRect, parentScroll: ParentScroll | null) {
+  const GAP = 8
+  const APPROX_H = 36
+  const APPROX_W = 330
+  const canvasTopInIframe = parentScroll != null ? parentScroll.headerH - parentScroll.iframeOffsetTop : 0
+  const vh = parentScroll != null ? parentScroll.canvasH : window.innerHeight
+  const visibleTop = rect.top - canvasTopInIframe
+  const visibleBottom = rect.bottom - canvasTopInIframe
+  const spaceAbove = visibleTop
+  const spaceBelow = vh - visibleBottom
+  const fitsAbove = spaceAbove >= APPROX_H + GAP
+  const fitsBelow = spaceBelow >= APPROX_H + GAP
+  let top: number
+  let transform: string
+  if (fitsAbove) {
+    top = rect.top - GAP
+    transform = 'translateX(-50%) translateY(-100%)'
+  } else if (fitsBelow) {
+    top = rect.bottom + GAP
+    transform = 'translateX(-50%)'
+  } else {
+    top = spaceAbove >= spaceBelow ? canvasTopInIframe + GAP : canvasTopInIframe + vh - APPROX_H - GAP
+    transform = 'translateX(-50%)'
+  }
+  const rawLeft = rect.left + rect.width / 2
+  const left = Math.max(GAP + APPROX_W / 2, Math.min(rawLeft, window.innerWidth - GAP - APPROX_W / 2))
+  return { top, left, transform }
+}
+
 function FloatingToolbar({
   rect,
+  parentScroll,
+  elRef,
   onCommand,
   activeCommands,
 }: {
   rect: DOMRect
+  parentScroll: ParentScroll | null
+  elRef: React.RefObject<HTMLDivElement | null>
   onCommand: (cmd: string) => void
   activeCommands: Set<string>
 }) {
-  const GAP = 8
-  const APPROX_H = 36
-  // Estimated toolbar width (9 buttons × 28px + 2 separators × 1px + 10 gaps × 6px + 8px padding ≈ 330px)
-  const APPROX_W = 330
-  const spaceAbove = rect.top
-  const spaceBelow = window.innerHeight - rect.bottom
-  const fitsAbove = spaceAbove >= APPROX_H + GAP
-  const fitsBelow = spaceBelow >= APPROX_H + GAP
-
-  let anchorTop: number
-  let transform: string
-  if (fitsAbove) {
-    anchorTop = rect.top - GAP
-    transform = 'translateX(-50%) translateY(-100%)'
-  } else if (fitsBelow) {
-    anchorTop = rect.bottom + GAP
-    transform = 'translateX(-50%)'
-  } else {
-    anchorTop = spaceAbove >= spaceBelow ? GAP : window.innerHeight - APPROX_H - GAP
-    transform = 'translateX(-50%)'
-  }
-
-  // Clamp so the full toolbar width stays in the viewport — shifts left/right near edges
-  const rawLeft = rect.left + rect.width / 2
-  const anchorLeft = Math.max(GAP + APPROX_W / 2, Math.min(rawLeft, window.innerWidth - GAP - APPROX_W / 2))
+  const { top, left, transform } = calcToolbarPos(rect, parentScroll)
 
   return (
     <div
+      ref={elRef}
       data-ohw-toolbar=""
       style={{
         position: 'fixed',
-        top: anchorTop,
-        left: anchorLeft,
+        top,
+        left,
         transform,
         zIndex: 2147483647,
         background: '#fff',
@@ -308,6 +321,7 @@ function FloatingToolbar({
         fontFamily: 'sans-serif',
         pointerEvents: 'auto',
         whiteSpace: 'nowrap',
+        transition: 'top 80ms ease-out, left 80ms ease-out',
       }}
     >
       {TOOLBAR_GROUPS.map((btns, gi) => (
@@ -451,6 +465,9 @@ export function OhhwellsBridge() {
   const activeElRef = useRef<HTMLElement | null>(null)
   const originalContentRef = useRef<string | null>(null)
   const activeStateElRef = useRef<HTMLElement | null>(null)
+  const parentScrollRef = useRef<{ iframeOffsetTop: number; headerH: number; canvasH: number } | null>(null)
+  const toolbarElRef = useRef<HTMLDivElement | null>(null)
+  const glowElRef = useRef<HTMLDivElement | null>(null)
   const hoveredImageRef = useRef<HTMLElement | null>(null)
   const editStylesRef = useRef<{ base: HTMLStyleElement; forceHover: HTMLStyleElement; stateViews: HTMLStyleElement } | null>(null)
   const activateRef = useRef<(el: HTMLElement) => void>(() => {})
@@ -463,6 +480,30 @@ export function OhhwellsBridge() {
   const [toggleState, setToggleState] = useState<{ rect: DOMRect; activeState: string; states: string[] } | null>(null)
   const [maxBadge, setMaxBadge] = useState<{ rect: DOMRect; current: number; max: number } | null>(null)
   const [activeCommands, setActiveCommands] = useState<Set<string>>(new Set())
+
+  // Full-height iframe (parent scrolls): handleScroll won't fire because window.scroll
+  // doesn't propagate from parent → iframe. Use visualViewport events instead to re-fetch
+  // In the VibeCanvasEditor the iframe is full-height and the parent window scrolls,
+  // so window.scroll never fires inside the iframe. Use visualViewport events to keep
+  // rects current when the parent scrolls.
+  useEffect(() => {
+    const update = () => {
+      const el = activeElRef.current
+      if (el) setToolbarRect(el.getBoundingClientRect())
+      setToggleState((prev) => {
+        if (!prev || !activeStateElRef.current) return prev
+        return { ...prev, rect: activeStateElRef.current.getBoundingClientRect() }
+      })
+    }
+    const vvp = window.visualViewport
+    if (!vvp) return
+    vvp.addEventListener('scroll', update)
+    vvp.addEventListener('resize', update)
+    return () => {
+      vvp.removeEventListener('scroll', update)
+      vvp.removeEventListener('resize', update)
+    }
+  }, [])
 
   const refreshStateRules = useCallback(() => {
     editStylesRef.current?.forceHover &&
@@ -1232,7 +1273,7 @@ export function OhhwellsBridge() {
     const handleScroll = () => {
       if (activeElRef.current) {
         const r = activeElRef.current.getBoundingClientRect()
-        setToolbarRect(r)
+        applyToolbarPos(r)
         setMaxBadge((prev) => (prev ? { ...prev, rect: r } : null))
       }
       if (activeStateElRef.current) {
@@ -1308,10 +1349,34 @@ export function OhhwellsBridge() {
       document.documentElement.style.setProperty('--ohw-canvas-h', `${e.data.height}px`)
     }
 
+    // Direct DOM update — no React re-render, no frame delay
+    const applyToolbarPos = (rect: DOMRect) => {
+      const ps = parentScrollRef.current
+      if (toolbarElRef.current) {
+        const { top, left, transform } = calcToolbarPos(rect, ps)
+        toolbarElRef.current.style.top = `${top}px`
+        toolbarElRef.current.style.left = `${left}px`
+        toolbarElRef.current.style.transform = transform
+      }
+      if (glowElRef.current) {
+        const GAP = 6
+        glowElRef.current.style.top = `${rect.top - GAP}px`
+        glowElRef.current.style.left = `${rect.left - GAP}px`
+      }
+    }
+
+    const handleParentScroll = (e: MessageEvent) => {
+      if (e.data?.type !== 'ow:parent-scroll') return
+      const { iframeOffsetTop, headerH, canvasH } = e.data as { iframeOffsetTop: number; headerH: number; canvasH: number }
+      parentScrollRef.current = { iframeOffsetTop, headerH, canvasH }
+      if (activeElRef.current) applyToolbarPos(activeElRef.current.getBoundingClientRect())
+    }
+
     window.addEventListener('message', handleSave)
     window.addEventListener('message', handleImageUrl)
     window.addEventListener('message', handleAnimLock)
     window.addEventListener('message', handleCanvasHeight)
+    window.addEventListener('message', handleParentScroll)
     window.addEventListener('message', handlePointerSync)
     document.addEventListener('click', handleClick, true)
     document.addEventListener('paste', handlePaste, true)
@@ -1345,6 +1410,7 @@ export function OhhwellsBridge() {
       window.removeEventListener('message', handleImageUrl)
       window.removeEventListener('message', handleAnimLock)
       window.removeEventListener('message', handleCanvasHeight)
+      window.removeEventListener('message', handleParentScroll)
       window.removeEventListener('message', handlePointerSync)
       window.removeEventListener('message', handleHydrate)
       window.removeEventListener('message', handleDeactivate)
@@ -1405,8 +1471,8 @@ export function OhhwellsBridge() {
     <>
       {toolbarRect && (
         <>
-          <GlowFrame rect={toolbarRect} />
-          <FloatingToolbar rect={toolbarRect} onCommand={handleCommand} activeCommands={activeCommands} />
+          <GlowFrame rect={toolbarRect} elRef={glowElRef} />
+          <FloatingToolbar rect={toolbarRect} parentScroll={parentScrollRef.current} elRef={toolbarElRef} onCommand={handleCommand} activeCommands={activeCommands} />
         </>
       )}
       {maxBadge && (
