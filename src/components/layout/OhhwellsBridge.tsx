@@ -261,25 +261,38 @@ function calcToolbarPos(rect: DOMRect, parentScroll: ParentScroll | null) {
   const APPROX_H = 36
   const APPROX_W = 330
   const canvasTopInIframe = parentScroll != null ? parentScroll.headerH - parentScroll.iframeOffsetTop : 0
-  const vh = parentScroll != null ? parentScroll.canvasH : window.innerHeight
+
   const visibleTop = rect.top - canvasTopInIframe
   const visibleBottom = rect.bottom - canvasTopInIframe
-  const spaceAbove = visibleTop
-  const spaceBelow = vh - visibleBottom
-  const fitsAbove = spaceAbove >= APPROX_H + GAP
-  const fitsBelow = spaceBelow >= APPROX_H + GAP
+
+  // Three-state machine:
+  //   above  — block top is in view; toolbar rides above the block
+  //   sticky — block top has scrolled past the canvas top; toolbar pins to canvas top edge
+  //   flip   — exit from sticky only: block bottom approaches toolbar height,
+  //            meaning there's no more block content to anchor over; toolbar
+  //            attaches to block bottom and rides off-screen with it
+  //
+  // Short blocks (height ≤ APPROX_H + GAP) never enter sticky so never flip —
+  // toolbar just rides above until the block is out of view.
+  const isTall = rect.height > APPROX_H + GAP
+
   let top: number
   let transform: string
-  if (fitsAbove) {
+
+  if (visibleTop > 0 || !isTall) {
+    // Above phase
     top = rect.top - GAP
     transform = 'translateX(-50%) translateY(-100%)'
-  } else if (fitsBelow) {
-    top = rect.bottom + GAP
+  } else if (visibleBottom > APPROX_H + GAP) {
+    // Sticky phase
+    top = canvasTopInIframe + GAP
     transform = 'translateX(-50%)'
   } else {
-    top = spaceAbove >= spaceBelow ? canvasTopInIframe + GAP : canvasTopInIframe + vh - APPROX_H - GAP
+    // Flip phase — exit from sticky
+    top = rect.bottom + GAP
     transform = 'translateX(-50%)'
   }
+
   const rawLeft = rect.left + rect.width / 2
   const left = Math.max(GAP + APPROX_W / 2, Math.min(rawLeft, window.innerWidth - GAP - APPROX_W / 2))
   return { top, left, transform }
@@ -321,7 +334,6 @@ function FloatingToolbar({
         fontFamily: 'sans-serif',
         pointerEvents: 'auto',
         whiteSpace: 'nowrap',
-        transition: 'top 80ms ease-out, left 80ms ease-out',
       }}
     >
       {TOOLBAR_GROUPS.map((btns, gi) => (
