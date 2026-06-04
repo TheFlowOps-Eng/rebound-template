@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { BrandProvider } from "@/components/layout/BrandProvider";
-import { OhhwellsBridge } from "@/components/layout/OhhwellsBridge";
+import { OhhwellsBridgeLoader } from "@/components/layout/OhhwellsBridgeLoader";
 import { PreserveSearchParams } from "@/components/layout/PreserveSearchParams";
 import { OHW_LOADER_STYLE, OhwLoaderSpinner } from "@/components/layout/OhwLoaderSurface";
 import { TopNav } from "@/components/layout/TopNav";
@@ -32,7 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
         <Suspense>
-          <OhhwellsBridge />
+          <OhhwellsBridgeLoader />
           {/* <PreserveSearchParams /> */}
         </Suspense>
         <BrandProvider>
