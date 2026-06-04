@@ -9,6 +9,7 @@ import { Footer } from "@/components/layout/Footer";
 import { instrumentSerif, redHatDisplay } from "@/lib/fonts";
 import { buildMetadata } from "@/lib/seo";
 import "@/styles/globals.css";
+import "@ohhwells/bridge/styles";
 
 export const metadata: Metadata = buildMetadata();
 
