@@ -247,7 +247,7 @@ function Card({ p }: { p: Instructor }) {
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img className="ig-img" src={p.img} alt={p.name} />
-      <h2 className="ig-name" data-ohw-editable="text" data-ohw-key={`${slug}-name`}>{p.name}</h2>
+      <h2 className="ig-name" data-ohw-key={`${slug}-name`}>{p.name}</h2>
 
       <div className="ig-panel">
         <h3
