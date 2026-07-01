@@ -7,6 +7,7 @@ type Props = AboutContent["waitlist"];
 export function WaitlistCTA({ eyebrow, headline, headlineEm, body, submitLabel }: Props) {
   return (
     <section
+      data-ohw-section="waitlist-cta"
       className="waitlist-section"
       style={{
         background: "var(--umber)",

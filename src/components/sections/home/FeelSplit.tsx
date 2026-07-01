@@ -29,6 +29,7 @@ export function FeelSplit({ left, right }: Props) {
 
   return (
     <section
+      data-ohw-section="feel-split"
       style={{
         display: "grid",
         gridTemplateColumns: "1fr 1fr",

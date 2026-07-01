@@ -6,6 +6,7 @@ type Props = PricingContent["matcher"];
 export function PackageMatcher({ eyebrow, headline, rows }: Props) {
   return (
     <section
+      data-ohw-section="package-matcher"
       className="pricing-matcher"
       style={{ background: "var(--bone)", padding: "20px 64px 130px" }}
     >

@@ -4,7 +4,7 @@ type Props = { team: InstructorsContent["team"] };
 
 export function InstructorGrid({ team }: Props) {
   return (
-    <section style={{ padding: "0 0 0", background: "var(--bone)" }}>
+    <section data-ohw-section="instructor-grid" style={{ padding: "0 0 0", background: "var(--bone)" }}>
       <style>{`
         .ig-card {
           position: relative;

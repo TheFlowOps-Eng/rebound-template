@@ -5,6 +5,7 @@ type Props = HomeContent["wordmark"];
 export function WordmarkBand({ background, logo, alt }: Props) {
   return (
     <div
+      data-ohw-section="wordmark-band"
       data-ohw-editable="bg-image"
       data-ohw-key="wordmark-bg"
       role="img"
