@@ -13,6 +13,7 @@ export function PageHeader({
 }) {
   return (
     <header
+      data-ohw-section="page-header"
       {...(bgKey ? { 'data-ohw-editable': 'bg-image', 'data-ohw-key': bgKey } : {})}
       style={{
         position: "relative",

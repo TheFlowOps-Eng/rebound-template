@@ -25,6 +25,11 @@ export const brand: Brand = {
     ash: "#2A2A2E",
     carbon: "#242225",
     white: "#FFFFFF",
+    // Editor 4-color tokens — mapped to Re:Bound palette
+    primary: "#6A3921",  // espresso — Book Now button fill, selected date fill
+    light: "#EBECDD",    // ivory — section bg, button text on primary
+    dark: "#200C02",     // umberDeep — body text, Join Waitlist button
+    accent: "#A89B83",   // clay — accent / hover states
   },
   fonts: {
     // Documentation of the intended families. The actual @font-face

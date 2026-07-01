@@ -16,6 +16,11 @@ export type Brand = {
     ash: string;
     carbon: string;
     white: string;
+    // Editor 4-color tokens — map to widget elements
+    primary: string;
+    light: string;
+    dark: string;
+    accent: string;
   };
   fonts: {
     display: string;

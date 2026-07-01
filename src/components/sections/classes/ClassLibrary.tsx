@@ -35,7 +35,7 @@ export function ClassLibrary({ filters, items }: Props) {
   });
 
   return (
-    <>
+    <section data-ohw-section="class-library">
       <style>{`
         @media (max-width: 960px) {
           .cl-filters { padding: 40px 24px 20px !important; gap: 10px !important; }
@@ -162,7 +162,7 @@ export function ClassLibrary({ filters, items }: Props) {
           </article>
         ))}
       </div>
-    </>
+    </section>
   );
 }
 

@@ -7,6 +7,7 @@ export function StudioGallery({ images }: Props) {
 
   return (
     <section
+      data-ohw-section="studio-gallery"
       className="studio-gallery"
       style={{ background: "var(--bone)", padding: "20px 32px 100px" }}
     >

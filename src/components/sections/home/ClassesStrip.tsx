@@ -8,6 +8,7 @@ type Props = HomeContent["classes"];
 export function ClassesStrip({ eyebrow, headline, headlineEm, viewAll, items }: Props) {
   return (
     <section
+      data-ohw-section="classes-strip"
       className="classes-section"
       style={{
         background: "var(--clay)",

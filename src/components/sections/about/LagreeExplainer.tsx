@@ -5,7 +5,7 @@ type Props = AboutContent["explainer"];
 
 export function LagreeExplainer({ headline, headlineEm, body, image, cards, cta }: Props) {
   return (
-    <section className="explainer-section" style={{ background: "var(--bone)", padding: "140px 64px 160px" }}>
+    <section data-ohw-section="lagree-explainer" className="explainer-section" style={{ background: "var(--bone)", padding: "140px 64px 160px" }}>
       <style>{`
         @media (max-width: 960px) {
           .explainer-section { padding: 80px 28px 96px !important; }

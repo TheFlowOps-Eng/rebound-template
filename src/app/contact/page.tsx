@@ -19,6 +19,7 @@ export default function ContactPage() {
       <PageHeader {...contactContent.header} ohwKey="contact-page-title" bgKey="contact-header-bg" />
       <HelloHero {...contactContent.hello} />
       <section
+        data-ohw-section="contact-form"
         className="contact-form-section"
         style={{ background: "var(--bone)", padding: "100px 64px 120px" }}
       >

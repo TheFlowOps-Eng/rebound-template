@@ -6,6 +6,7 @@ type Props = ContactContent["hello"];
 export function HelloHero({ eyebrow, headline, headlineEm, body, channels }: Props) {
   return (
     <section
+      data-ohw-section="hello-hero"
       className="hello-section"
       style={{ background: "var(--bone)", paddingTop: 100 }}
     >
