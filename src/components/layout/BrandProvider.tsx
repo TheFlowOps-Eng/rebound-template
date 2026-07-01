@@ -29,6 +29,7 @@ const cssVars = (() => {
   // We do alias --font-label → --font-body since the brand uses the
   // same Red Hat Display face for both body and labels:
   lines.push(`--font-label: var(--font-body);`);
+  lines.push(`--font-heading: var(--font-display);`);
 
   // Type scale (numeric → px)
   for (const [k, v] of Object.entries(brand.type)) {
