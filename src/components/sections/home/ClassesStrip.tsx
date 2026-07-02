@@ -9,6 +9,7 @@ export function ClassesStrip({ eyebrow, headline, headlineEm, viewAll, items }: 
   return (
     <section
       data-ohw-section="classes-strip"
+      data-ohw-section-label="Classes"
       className="classes-section"
       style={{
         background: "var(--clay)",

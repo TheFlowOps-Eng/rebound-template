@@ -4,7 +4,10 @@ type Props = AboutContent["story"];
 
 export function StoryLetter({ eyebrow, paragraphs, signature }: Props) {
   return (
-    <section data-ohw-section="story-letter" className="story-section" style={{ background: "var(--bone)", padding: "120px 64px 140px" }}>
+    <section
+      data-ohw-section="story-letter"
+      data-ohw-section-label="Our Story"
+      className="story-section" style={{ background: "var(--bone)", padding: "120px 64px 140px" }}>
       <style>{`
         @media (max-width: 960px) {
           .story-section { padding: 80px 28px 96px !important; }

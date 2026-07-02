@@ -15,6 +15,7 @@ export function MonthlyMemberships({
   return (
     <section
       data-ohw-section="monthly-memberships"
+      data-ohw-section-label="Memberships"
       className="pricing-memberships"
       style={{ background: "var(--bone)", padding: "110px 64px 140px" }}
     >

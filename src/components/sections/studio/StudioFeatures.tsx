@@ -7,6 +7,7 @@ export function StudioFeatures({ eyebrow, headline, items }: Props) {
   return (
     <section
       data-ohw-section="studio-features"
+      data-ohw-section-label="Studio Features"
       className="studio-features"
       style={{ background: "var(--clay)", color: "var(--bone)", padding: "120px 64px" }}
     >
