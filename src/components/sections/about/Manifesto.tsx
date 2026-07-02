@@ -7,7 +7,10 @@ export function Manifesto({ headline, primaryCta, secondaryCta, strip }: Props) 
   const loop = [...strip, ...strip];
 
   return (
-    <section style={{ background: "var(--stone)", padding: "120px 0 110px", overflow: "hidden" }}>
+    <section
+      data-ohw-section="manifesto"
+      data-ohw-section-label="Manifesto"
+      style={{ background: "var(--stone)", padding: "120px 0 110px", overflow: "hidden" }}>
       <div style={{ maxWidth: 1280, margin: "0 auto", textAlign: "center", padding: "0 64px" }}>
         <h2
           data-ohw-editable="text"

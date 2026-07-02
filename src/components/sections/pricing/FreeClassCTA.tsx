@@ -7,6 +7,8 @@ type Props = PricingContent["freeClass"];
 export function FreeClassCTA({ eyebrow, headline, headlineEm, body, cta }: Props) {
   return (
     <section
+      data-ohw-section="free-class-cta"
+      data-ohw-section-label="Free Class"
       className="pricing-free"
       style={{
         background: "var(--bone)",

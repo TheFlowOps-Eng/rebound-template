@@ -6,7 +6,10 @@ type Props = HomeContent["founder"];
 
 export function FounderTeaser({ eyebrow, headline, body, cta, image }: Props) {
   return (
-    <section style={{ maxWidth: 1280, margin: "0 auto", padding: "120px 64px" }}>
+    <section
+      data-ohw-section="founder-teaser"
+      data-ohw-section-label="Founder"
+      style={{ maxWidth: 1280, margin: "0 auto", padding: "120px 64px" }}>
       <div
         style={{
           display: "grid",

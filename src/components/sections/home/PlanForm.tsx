@@ -21,7 +21,10 @@ export function PlanForm({ eyebrow, headline, headlineEm, body, submitLabel }: P
   };
 
   return (
-    <section className="plan-section" style={{ background: "var(--bone)", padding: "120px 64px 100px" }}>
+    <section
+      data-ohw-section="plan-form"
+      data-ohw-section-label="Plan Form"
+      className="plan-section" style={{ background: "var(--bone)", padding: "120px 64px 100px" }}>
       <style>{`
         @media (max-width: 960px) {
           .plan-section { padding: 80px 28px !important; }

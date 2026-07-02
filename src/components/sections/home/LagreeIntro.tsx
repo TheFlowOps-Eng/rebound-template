@@ -6,7 +6,10 @@ type Props = HomeContent["lagree"];
 
 export function LagreeIntro({ eyebrow, headlineEm, headline, body, cta, image }: Props) {
   return (
-    <section className="lagree-section" style={{ background: "var(--bone)", padding: "120px 64px" }}>
+    <section
+      data-ohw-section="lagree-intro"
+      data-ohw-section-label="Lagree Intro"
+      className="lagree-section" style={{ background: "var(--bone)", padding: "120px 64px" }}>
       <style>{`
         @media (max-width: 960px) {
           .lagree-section { padding: 80px 28px !important; }

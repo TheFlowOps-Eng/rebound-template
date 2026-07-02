@@ -101,21 +101,31 @@ export function TopNav({ onLightBg = false }: { onLightBg?: boolean }) {
         {!isMobile && (
           <div style={{ display: "flex", justifyContent: "center", gap: 32 }}>
             {globalContent.nav
-              .filter((item) => item.label.toLowerCase() !== "home")
-              .map((item, i) => (
+              .map((item, i) => ({ item, i }))
+              .filter(({ item }) => item.label.toLowerCase() !== "home")
+              .map(({ item, i }) => (
                 <Link
                   key={`${item.href}-${item.label}-${i}`}
                   href={item.href}
+                  data-ohw-href-key={`nav-${i}-href`}
                   style={linkStyle(isActive(item.href, item.label))}
                 >
-                  {item.label}
+                  <span data-ohw-editable="text" data-ohw-key={`nav-${i}-label`}>
+                    {item.label}
+                  </span>
                 </Link>
               ))}
           </div>
         )}
         {!isMobile ? (
-          <Link href={globalContent.bookCta.href} style={bookBtnStyle}>
-            {globalContent.bookCta.label}
+          <Link
+            href={globalContent.bookCta.href}
+            data-ohw-href-key="nav-book-href"
+            style={bookBtnStyle}
+          >
+            <span data-ohw-editable="text" data-ohw-key="nav-book-label">
+              {globalContent.bookCta.label}
+            </span>
           </Link>
         ) : (
           <button
@@ -191,18 +201,24 @@ export function TopNav({ onLightBg = false }: { onLightBg?: boolean }) {
               <Link
                 key={`drawer-${item.href}-${item.label}-${i}`}
                 href={item.href}
+                data-ohw-href-key={`nav-${i}-href`}
                 onClick={() => setOpen(false)}
                 style={drawerLinkStyle(isActive(item.href, item.label))}
               >
-                {item.label}
+                <span data-ohw-editable="text" data-ohw-key={`nav-${i}-label`}>
+                  {item.label}
+                </span>
               </Link>
             ))}
             <Link
               href={globalContent.bookCta.href}
+              data-ohw-href-key="nav-book-href"
               onClick={() => setOpen(false)}
               style={{ ...bookBtnStyle, marginTop: 24, alignSelf: "flex-start" }}
             >
-              {globalContent.bookCta.label}
+              <span data-ohw-editable="text" data-ohw-key="nav-book-label">
+                {globalContent.bookCta.label}
+              </span>
             </Link>
           </aside>
         </>

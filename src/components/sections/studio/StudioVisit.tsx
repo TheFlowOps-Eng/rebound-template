@@ -7,6 +7,8 @@ type Props = StudioContent["visit"];
 export function StudioVisit({ eyebrow, headline, address, hours, cta }: Props) {
   return (
     <section
+      data-ohw-section="studio-visit"
+      data-ohw-section-label="Visit Studio"
       className="studio-visit"
       style={{ background: "var(--bone)", padding: "120px 64px" }}
     >

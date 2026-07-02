@@ -6,6 +6,8 @@ type Props = HomeContent["hero"];
 export function Hero({ headline, headlineEm, subhead, cta, background }: Props) {
   return (
     <section
+      data-ohw-section="hero"
+      data-ohw-section-label="Hero"
       data-ohw-editable="bg-image"
       data-ohw-key="hero-bg"
       style={{

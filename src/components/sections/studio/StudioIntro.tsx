@@ -6,6 +6,8 @@ type Props = StudioContent["intro"];
 export function StudioIntro({ eyebrow, headline, headlineEm, paragraphs }: Props) {
   return (
     <section
+      data-ohw-section="studio-intro"
+      data-ohw-section-label="Studio Intro"
       className="studio-intro"
       style={{ background: "var(--bone)", padding: "120px 64px 80px" }}
     >

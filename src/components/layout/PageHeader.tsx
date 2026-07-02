@@ -4,16 +4,23 @@ export function PageHeader({
   height = 320,
   ohwKey,
   bgKey,
+  sectionId,
+  sectionLabel,
 }: {
   title: string;
   image: string;
   height?: number;
   ohwKey?: string;
   bgKey?: string;
+  sectionId?: string;
+  sectionLabel?: string;
 }) {
   return (
     <header
-      {...(bgKey ? { 'data-ohw-editable': 'bg-image', 'data-ohw-key': bgKey } : {})}
+      {...(sectionId
+        ? { "data-ohw-section": sectionId, "data-ohw-section-label": sectionLabel ?? title }
+        : {})}
+      {...(bgKey ? { "data-ohw-editable": "bg-image", "data-ohw-key": bgKey } : {})}
       style={{
         position: "relative",
         width: "100%",

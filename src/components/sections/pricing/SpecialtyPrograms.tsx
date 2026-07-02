@@ -7,6 +7,8 @@ type Props = PricingContent["specialty"];
 export function SpecialtyPrograms({ eyebrow, headline, body, cards, cta }: Props) {
   return (
     <section
+      data-ohw-section="specialty-programs"
+      data-ohw-section-label="Specialty Programs"
       className="pricing-specialty"
       style={{ background: "var(--bone)", padding: "30px 64px 110px", textAlign: "center" }}
     >

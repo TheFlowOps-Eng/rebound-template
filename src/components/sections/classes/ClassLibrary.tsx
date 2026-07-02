@@ -35,6 +35,7 @@ export function ClassLibrary({ filters, items }: Props) {
   });
 
   return (
+    <section data-ohw-section="class-library" data-ohw-section-label="Class Library">
     <>
       <style>{`
         @media (max-width: 960px) {
@@ -163,6 +164,7 @@ export function ClassLibrary({ filters, items }: Props) {
         ))}
       </div>
     </>
+    </section>
   );
 }
 

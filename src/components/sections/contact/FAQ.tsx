@@ -5,6 +5,8 @@ type Props = ContactContent["faq"];
 export function FAQ({ headline, items }: Props) {
   return (
     <section
+      data-ohw-section="faq"
+      data-ohw-section-label="FAQ"
       className="faq-section"
       style={{ background: "var(--stone)", padding: "120px 64px 140px" }}
     >

@@ -5,6 +5,8 @@ export function BenefitsMarquee({ items }: Props) {
 
   return (
     <section
+      data-ohw-section="benefits-marquee"
+      data-ohw-section-label="Benefits"
       style={{
         background: "var(--clay)",
         color: "var(--bone)",

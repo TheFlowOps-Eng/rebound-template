@@ -31,6 +31,8 @@ export function Testimonials({ items, primaryCta, secondaryCta, background }: Pr
 
   return (
     <section
+      data-ohw-section="testimonials"
+      data-ohw-section-label="Testimonials"
       style={{
         position: "relative",
         minHeight: 640,

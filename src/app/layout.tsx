@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { BrandProvider } from "@/components/layout/BrandProvider";
-import { OhhwellsBridge } from "@/components/layout/OhhwellsBridge";
+import { OhhwellsBridge } from "@ohhwells/bridge";
 import { PreserveSearchParams } from "@/components/layout/PreserveSearchParams";
 import { OHW_LOADER_STYLE, OhwLoaderSpinner } from "@/components/layout/OhwLoaderSurface";
 import { TopNav } from "@/components/layout/TopNav";
