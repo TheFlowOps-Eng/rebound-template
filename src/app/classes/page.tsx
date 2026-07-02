@@ -13,7 +13,13 @@ export const metadata = buildMetadata({
 export default function ClassesPage() {
   return (
     <>
-      <PageHeader {...classesContent.header} ohwKey="classes-page-title" bgKey="classes-header-bg" />
+      <PageHeader
+        {...classesContent.header}
+        ohwKey="classes-page-title"
+        bgKey="classes-header-bg"
+        sectionId="page-header"
+        sectionLabel="Page Header"
+      />
       <ClassLibrary filters={classesContent.filters} items={classesContent.items} />
       <WordmarkBand
         background="/assets/footer-bg.jpg"

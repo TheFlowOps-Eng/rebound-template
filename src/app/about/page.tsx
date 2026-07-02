@@ -15,7 +15,21 @@ export const metadata = buildMetadata({
 export default function AboutPage() {
   return (
     <>
-      <PageHeader {...aboutContent.header} ohwKey="about-page-title" bgKey="about-header-bg" />
+      <PageHeader
+        {...aboutContent.header}
+        ohwKey="about-page-title"
+        bgKey="about-header-bg"
+        sectionId="page-header"
+        sectionLabel="Page Header"
+      />
+      {/* Scroll target for link-editor dev fixtures (ohw-fixtures=1) */}
+      <div
+        id="personal-training"
+        data-ohw-section="personal-training"
+        data-ohw-section-label="Personal training"
+        className="pointer-events-none absolute h-px w-px overflow-hidden opacity-0"
+        aria-hidden
+      />
       <StoryLetter {...aboutContent.story} />
       <Manifesto {...aboutContent.manifesto} />
       <LagreeExplainer {...aboutContent.explainer} />

@@ -8,6 +8,7 @@ export function WaitlistCTA({ eyebrow, headline, headlineEm, body, submitLabel }
   return (
     <section
       data-ohw-section="waitlist-cta"
+      data-ohw-section-label="Waitlist"
       className="waitlist-section"
       style={{
         background: "var(--umber)",

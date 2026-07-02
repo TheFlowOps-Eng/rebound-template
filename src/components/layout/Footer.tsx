@@ -140,8 +140,15 @@ export function Footer() {
           {f.columns.map((c, i) => (
             <div key={i} className="rb-footer-link-col">
               {c.items.map((item, j) => (
-                <Link key={j} href={item.href} style={linkStyle}>
-                  {item.label}
+                <Link
+                  key={j}
+                  href={item.href}
+                  data-ohw-href-key={`footer-${i}-${j}-href`}
+                  style={linkStyle}
+                >
+                  <span data-ohw-editable="text" data-ohw-key={`footer-${i}-${j}-label`}>
+                    {item.label}
+                  </span>
                 </Link>
               ))}
             </div>

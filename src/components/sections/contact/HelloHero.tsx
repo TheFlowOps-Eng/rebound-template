@@ -7,6 +7,7 @@ export function HelloHero({ eyebrow, headline, headlineEm, body, channels }: Pro
   return (
     <section
       data-ohw-section="hello-hero"
+      data-ohw-section-label="Hello"
       className="hello-section"
       style={{ background: "var(--bone)", paddingTop: 100 }}
     >

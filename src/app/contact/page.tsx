@@ -16,10 +16,17 @@ export const metadata = buildMetadata({
 export default function ContactPage() {
   return (
     <>
-      <PageHeader {...contactContent.header} ohwKey="contact-page-title" bgKey="contact-header-bg" />
+      <PageHeader
+        {...contactContent.header}
+        ohwKey="contact-page-title"
+        bgKey="contact-header-bg"
+        sectionId="page-header"
+        sectionLabel="Page Header"
+      />
       <HelloHero {...contactContent.hello} />
       <section
         data-ohw-section="contact-form"
+        data-ohw-section-label="Contact Form"
         className="contact-form-section"
         style={{ background: "var(--bone)", padding: "100px 64px 120px" }}
       >
