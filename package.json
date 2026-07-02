@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@ohhwells/bridge": "^0.1.23",
+    "@ohhwells/bridge": "^0.1.24",
     "@radix-ui/react-toggle-group": "^1.1.11",
     "@tailwindcss/postcss": "^4.3.0",
     "class-variance-authority": "^0.7.1",
