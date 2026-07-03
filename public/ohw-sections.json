@@ -1,0 +1,51 @@
+{
+  "/": [
+    { "id": "hero", "label": "Hero" },
+    { "id": "lagree-intro", "label": "Lagree Intro" },
+    { "id": "classes-strip", "label": "Classes" },
+    { "id": "feel-split", "label": "Feel Split" },
+    { "id": "founder-teaser", "label": "Founder" },
+    { "id": "plan-form", "label": "Plan Form" },
+    { "id": "testimonials", "label": "Testimonials" },
+    { "id": "wordmark", "label": "Wordmark" }
+  ],
+  "/about": [
+    { "id": "page-header", "label": "Page Header" },
+    { "id": "personal-training", "label": "Personal training" },
+    { "id": "story-letter", "label": "Our Story" },
+    { "id": "manifesto", "label": "Manifesto" },
+    { "id": "lagree-explainer", "label": "Lagree Explainer" },
+    { "id": "waitlist-cta", "label": "Waitlist" }
+  ],
+  "/classes": [
+    { "id": "page-header", "label": "Page Header" },
+    { "id": "class-library", "label": "Class Library" }
+  ],
+  "/pricing": [
+    { "id": "page-header", "label": "Page Header" },
+    { "id": "free-class-cta", "label": "Free Class" },
+    { "id": "benefits-marquee", "label": "Benefits" },
+    { "id": "monthly-memberships", "label": "Memberships" },
+    { "id": "specialty-programs", "label": "Specialty Programs" },
+    { "id": "package-matcher", "label": "Packages" },
+    { "id": "wordmark", "label": "Wordmark" }
+  ],
+  "/studio": [
+    { "id": "page-header", "label": "Page Header" },
+    { "id": "studio-intro", "label": "Studio Intro" },
+    { "id": "studio-features", "label": "Studio Features" },
+    { "id": "studio-gallery", "label": "Studio Gallery" },
+    { "id": "studio-visit", "label": "Visit Studio" }
+  ],
+  "/instructors": [
+    { "id": "page-header", "label": "Page Header" },
+    { "id": "instructor-grid", "label": "Instructors" }
+  ],
+  "/contact": [
+    { "id": "page-header", "label": "Page Header" },
+    { "id": "hello-hero", "label": "Hello" },
+    { "id": "contact-form", "label": "Contact Form" },
+    { "id": "faq", "label": "FAQ" },
+    { "id": "wordmark", "label": "Wordmark" }
+  ]
+}

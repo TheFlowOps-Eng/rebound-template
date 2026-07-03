@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
+import { OhwLink } from "@/components/ui/OhwLink";
 import { globalContent } from "@/content/global";
 
 /**
@@ -140,16 +140,16 @@ export function Footer() {
           {f.columns.map((c, i) => (
             <div key={i} className="rb-footer-link-col">
               {c.items.map((item, j) => (
-                <Link
+                <OhwLink
                   key={j}
-                  href={item.href}
-                  data-ohw-href-key={`footer-${i}-${j}-href`}
+                  hrefKey={`footer-${i}-${j}-href`}
+                  defaultHref={item.href}
                   style={linkStyle}
                 >
                   <span data-ohw-editable="text" data-ohw-key={`footer-${i}-${j}-label`}>
                     {item.label}
                   </span>
-                </Link>
+                </OhwLink>
               ))}
             </div>
           ))}

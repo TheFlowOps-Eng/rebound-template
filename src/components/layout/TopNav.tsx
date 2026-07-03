@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Wordmark } from "@/components/layout/Wordmark";
+import { OhwLink } from "@/components/ui/OhwLink";
 import { globalContent } from "@/content/global";
 
 /**
@@ -32,8 +33,9 @@ export function TopNav({ onLightBg = false }: { onLightBg?: boolean }) {
   const homeIsAmbiguous = homeMatches.length > 1;
 
   const isActive = (href: string, label: string) => {
-    if (homeIsAmbiguous && href === "/" && label !== "Home") return false;
-    return pathname === href;
+    const path = href.split("#")[0] || "/";
+    if (homeIsAmbiguous && path === "/" && label !== "Home") return false;
+    return pathname === path;
   };
 
   const linkStyle = (active: boolean) => ({
@@ -104,29 +106,29 @@ export function TopNav({ onLightBg = false }: { onLightBg?: boolean }) {
               .map((item, i) => ({ item, i }))
               .filter(({ item }) => item.label.toLowerCase() !== "home")
               .map(({ item, i }) => (
-                <Link
+                <OhwLink
                   key={`${item.href}-${item.label}-${i}`}
-                  href={item.href}
-                  data-ohw-href-key={`nav-${i}-href`}
+                  hrefKey={`nav-${i}-href`}
+                  defaultHref={item.href}
                   style={linkStyle(isActive(item.href, item.label))}
                 >
                   <span data-ohw-editable="text" data-ohw-key={`nav-${i}-label`}>
                     {item.label}
                   </span>
-                </Link>
+                </OhwLink>
               ))}
           </div>
         )}
         {!isMobile ? (
-          <Link
-            href={globalContent.bookCta.href}
-            data-ohw-href-key="nav-book-href"
+          <OhwLink
+            hrefKey="nav-book-href"
+            defaultHref={globalContent.bookCta.href}
             style={bookBtnStyle}
           >
             <span data-ohw-editable="text" data-ohw-key="nav-book-label">
               {globalContent.bookCta.label}
             </span>
-          </Link>
+          </OhwLink>
         ) : (
           <button
             aria-label="Open menu"
@@ -198,28 +200,28 @@ export function TopNav({ onLightBg = false }: { onLightBg?: boolean }) {
               ×
             </button>
             {globalContent.nav.map((item, i) => (
-              <Link
+              <OhwLink
                 key={`drawer-${item.href}-${item.label}-${i}`}
-                href={item.href}
-                data-ohw-href-key={`nav-${i}-href`}
+                hrefKey={`nav-${i}-href`}
+                defaultHref={item.href}
                 onClick={() => setOpen(false)}
                 style={drawerLinkStyle(isActive(item.href, item.label))}
               >
                 <span data-ohw-editable="text" data-ohw-key={`nav-${i}-label`}>
                   {item.label}
                 </span>
-              </Link>
+              </OhwLink>
             ))}
-            <Link
-              href={globalContent.bookCta.href}
-              data-ohw-href-key="nav-book-href"
+            <OhwLink
+              hrefKey="nav-book-href"
+              defaultHref={globalContent.bookCta.href}
               onClick={() => setOpen(false)}
               style={{ ...bookBtnStyle, marginTop: 24, alignSelf: "flex-start" }}
             >
               <span data-ohw-editable="text" data-ohw-key="nav-book-label">
                 {globalContent.bookCta.label}
               </span>
-            </Link>
+            </OhwLink>
           </aside>
         </>
       )}
