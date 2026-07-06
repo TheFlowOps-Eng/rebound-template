@@ -263,6 +263,37 @@ For components with CSS `:hover` or `:focus` states, use `"hover"` or `"focus"` 
 
 ---
 
+## Bridge-managed links (nav, footer, navbar buttons)
+
+Use `OhwLink` (or a plain `<a>`) with `data-ohw-href-key` for links whose **destination URL** is edited in the canvas. Pair with an inner span that carries the label keys:
+
+```tsx
+import { OhwLink } from '@/components/ui/OhwLink'
+
+<OhwLink hrefKey="nav-book-href" defaultHref="/book" data-ohw-role="navbar-button">
+  <span data-ohw-editable="text" data-ohw-key="nav-book-label">
+    Book a Class
+  </span>
+</OhwLink>
+```
+
+| Attribute | Purpose |
+|-----------|---------|
+| `data-ohw-href-key` | Storage key for the link destination (saved as `type: link`) |
+| `data-ohw-key` + `data-ohw-editable` on inner span | Storage key for the visible label text |
+| `data-ohw-role="navbar-button"` | Marks a navbar CTA — first click shows **Edit link** + **More** toolbar |
+
+### Two-phase editing (navbar button only)
+
+For elements with `data-ohw-role="navbar-button"`:
+
+1. **First click** — selects the button (blue glow) and shows the **Edit link** + **More** toolbar.
+2. **Second click on the label** — enters inline text editing with the rich-text toolbar (Edit link icon still available).
+
+Nav/footer text links use the standard single-click flow: first click goes straight into text editing.
+
+---
+
 ## Rules
 
 1. **Every editable element needs both `data-ohw-key` and `data-ohw-editable`** — one without the other does nothing
