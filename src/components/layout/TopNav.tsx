@@ -124,6 +124,7 @@ export function TopNav({ onLightBg = false }: { onLightBg?: boolean }) {
             hrefKey="nav-book-href"
             defaultHref={globalContent.bookCta.href}
             data-ohw-role="navbar-button"
+            data-ohw-drag-disabled="true"
             style={bookBtnStyle}
           >
             <span data-ohw-editable="text" data-ohw-key="nav-book-label">
@@ -217,6 +218,7 @@ export function TopNav({ onLightBg = false }: { onLightBg?: boolean }) {
               hrefKey="nav-book-href"
               defaultHref={globalContent.bookCta.href}
               data-ohw-role="navbar-button"
+              data-ohw-drag-disabled="true"
               onClick={() => setOpen(false)}
               style={{ ...bookBtnStyle, marginTop: 24, alignSelf: "flex-start" }}
             >
