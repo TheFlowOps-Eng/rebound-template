@@ -110,6 +110,7 @@ export function TopNav({ onLightBg = false }: { onLightBg?: boolean }) {
                   key={`${item.href}-${item.label}-${i}`}
                   hrefKey={`nav-${i}-href`}
                   defaultHref={item.href}
+                  data-ohw-drag-disabled={item.href === "/contact" ? "true" : undefined}
                   style={linkStyle(isActive(item.href, item.label))}
                 >
                   <span data-ohw-editable="text" data-ohw-key={`nav-${i}-label`}>
@@ -205,6 +206,7 @@ export function TopNav({ onLightBg = false }: { onLightBg?: boolean }) {
                 key={`drawer-${item.href}-${item.label}-${i}`}
                 hrefKey={`nav-${i}-href`}
                 defaultHref={item.href}
+                data-ohw-drag-disabled={item.href === "/contact" ? "true" : undefined}
                 onClick={() => setOpen(false)}
                 style={drawerLinkStyle(isActive(item.href, item.label))}
               >
