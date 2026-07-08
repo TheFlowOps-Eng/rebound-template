@@ -66,6 +66,12 @@ export const brand: Brand = {
     display: "-0.010em",
     hero: "0.200em",
   },
+  weight: {
+    heading: 400,
+  },
+  headingScale: {
+    sectionH2: "clamp(40px, 4.4vw, 64px)",
+  },
   lineHeight: {
     display: 1.1,
     displayLoose: 1.22,

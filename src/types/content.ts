@@ -51,6 +51,18 @@ export type Brand = {
     display: string;
     hero: string;
   };
+  weight: {
+    // Every h1/h2/h3 in the codebase uses this weight — registered so
+    // components (and the shared scheduling widget) can reference one token
+    // instead of hardcoding 400 per heading.
+    heading: number;
+  };
+  headingScale: {
+    // Canonical "section intro" h2 size (mirrors StudioIntro's clamp()).
+    // Individual page sections still hand-tune their own hero-scale
+    // headlines — this is the size external/shared components inherit.
+    sectionH2: string;
+  };
   lineHeight: {
     display: number;
     displayLoose: number;
