@@ -265,23 +265,24 @@ For components with CSS `:hover` or `:focus` states, use `"hover"` or `"focus"` 
 
 ## Bridge-managed links (nav, footer, navbar buttons)
 
-Use `OhwLink` (or a plain `<a>`) with `data-ohw-href-key` for links whose **destination URL** is edited in the canvas. Pair with an inner span that carries the label keys:
+Use a plain `<a>` with `data-ohw-href-key` for links whose **destination URL** is edited in the canvas. Pair with an inner span that carries the label keys:
 
 ```tsx
-import { OhwLink } from '@/components/ui/OhwLink'
-
-<OhwLink hrefKey="nav-book-href" defaultHref="/book" data-ohw-role="navbar-button">
+<a href="/book" data-ohw-href-key="nav-book-href" data-ohw-role="navbar-button">
   <span data-ohw-editable="text" data-ohw-key="nav-book-label">
     Book a Class
   </span>
-</OhwLink>
+</a>
 ```
 
 | Attribute | Purpose |
 |-----------|---------|
 | `data-ohw-href-key` | Storage key for the link destination (saved as `type: link`) |
+| `href` | Default destination for SSR and first paint (bridge overrides when saved content exists) |
 | `data-ohw-key` + `data-ohw-editable` on inner span | Storage key for the visible label text |
 | `data-ohw-role="navbar-button"` | Marks a navbar CTA — first click shows **Edit link** + **More** toolbar |
+
+The bridge keeps `href` in sync across React re-renders — templates do not need a wrapper component.
 
 ### Two-phase editing (navbar button only)
 
