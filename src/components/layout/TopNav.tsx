@@ -107,6 +107,7 @@ export function TopNav({ onLightBg = false }: { onLightBg?: boolean }) {
               .map(({ item, i }) => (
                 <a
                   key={`${item.href}-${item.label}-${i}`}
+                  data-ohw-drag-disabled={item.href === "/contact" ? "true" : undefined}
                   href={item.href}
                   data-ohw-href-key={`nav-${i}-href`}
                   style={linkStyle(isActive(item.href, item.label))}
@@ -123,6 +124,7 @@ export function TopNav({ onLightBg = false }: { onLightBg?: boolean }) {
             href={globalContent.bookCta.href}
             data-ohw-href-key="nav-book-href"
             data-ohw-role="navbar-button"
+            data-ohw-drag-disabled="true"
             style={bookBtnStyle}
           >
             <span data-ohw-editable="text" data-ohw-key="nav-book-label">
@@ -202,6 +204,7 @@ export function TopNav({ onLightBg = false }: { onLightBg?: boolean }) {
             {globalContent.nav.map((item, i) => (
               <a
                 key={`drawer-${item.href}-${item.label}-${i}`}
+                data-ohw-drag-disabled={item.href === "/contact" ? "true" : undefined}
                 href={item.href}
                 data-ohw-href-key={`nav-${i}-href`}
                 onClick={() => setOpen(false)}
@@ -216,6 +219,7 @@ export function TopNav({ onLightBg = false }: { onLightBg?: boolean }) {
               href={globalContent.bookCta.href}
               data-ohw-href-key="nav-book-href"
               data-ohw-role="navbar-button"
+              data-ohw-drag-disabled="true"
               onClick={() => setOpen(false)}
               style={{ ...bookBtnStyle, marginTop: 24, alignSelf: "flex-start" }}
             >
