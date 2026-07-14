@@ -33,7 +33,11 @@ export function Footer() {
   };
 
   return (
-    <footer className="rb-footer">
+    <footer
+      className="rb-footer"
+      data-ohw-section="footer"
+      data-ohw-section-label="Footer"
+    >
       <style>{`
         .rb-footer {
           background: var(--bone);
