@@ -82,6 +82,7 @@ export function TopNav({ onLightBg = false }: { onLightBg?: boolean }) {
   return (
     <>
       <nav
+        data-ohw-nav-root=""
         style={{
           position: "absolute",
           top: 0,
@@ -100,19 +101,27 @@ export function TopNav({ onLightBg = false }: { onLightBg?: boolean }) {
           <Wordmark onDark={!onLightBg} height={isMobile ? 22 : 26} />
         </Link>
         {!isMobile && (
-          <div style={{ display: "flex", justifyContent: "center", gap: 32 }}>
+          <div
+            data-ohw-nav-container=""
+            style={{ display: "flex", justifyContent: "center", gap: 32 }}
+          >
             {globalContent.nav
               .map((item, i) => ({ item, i }))
               .filter(({ item }) => item.label.toLowerCase() !== "home")
               .map(({ item, i }) => (
                 <a
                   key={`${item.href}-${item.label}-${i}`}
-                  data-ohw-drag-disabled={item.href === "/contact" ? "true" : undefined}
+                  data-ohw-drag-disabled={
+                    item.href === "/contact" ? "true" : undefined
+                  }
                   href={item.href}
                   data-ohw-href-key={`nav-${i}-href`}
                   style={linkStyle(isActive(item.href, item.label))}
                 >
-                  <span data-ohw-editable="text" data-ohw-key={`nav-${i}-label`}>
+                  <span
+                    data-ohw-editable="text"
+                    data-ohw-key={`nav-${i}-label`}
+                  >
                     {item.label}
                   </span>
                 </a>
@@ -168,6 +177,7 @@ export function TopNav({ onLightBg = false }: { onLightBg?: boolean }) {
             }}
           />
           <aside
+            data-ohw-nav-drawer=""
             style={{
               position: "fixed",
               top: 0,
@@ -204,7 +214,9 @@ export function TopNav({ onLightBg = false }: { onLightBg?: boolean }) {
             {globalContent.nav.map((item, i) => (
               <a
                 key={`drawer-${item.href}-${item.label}-${i}`}
-                data-ohw-drag-disabled={item.href === "/contact" ? "true" : undefined}
+                data-ohw-drag-disabled={
+                  item.href === "/contact" ? "true" : undefined
+                }
                 href={item.href}
                 data-ohw-href-key={`nav-${i}-href`}
                 onClick={() => setOpen(false)}
@@ -221,7 +233,11 @@ export function TopNav({ onLightBg = false }: { onLightBg?: boolean }) {
               data-ohw-role="navbar-button"
               data-ohw-drag-disabled="true"
               onClick={() => setOpen(false)}
-              style={{ ...bookBtnStyle, marginTop: 24, alignSelf: "flex-start" }}
+              style={{
+                ...bookBtnStyle,
+                marginTop: 24,
+                alignSelf: "flex-start",
+              }}
             >
               <span data-ohw-editable="text" data-ohw-key="nav-book-label">
                 {globalContent.bookCta.label}
