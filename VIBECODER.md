@@ -20,7 +20,7 @@ A **unique string identifier** for each editable node. This is the key used to s
 - Keys are **stable** — changing a key after deployment loses saved content for that node
 
 ### `data-ohw-editable`
-Marks the element as editable in the canvas editor. Four modes:
+Marks the element as editable in the canvas editor. Five modes:
 
 | Value | Behavior |
 |-------|----------|
@@ -28,6 +28,7 @@ Marks the element as editable in the canvas editor. Four modes:
 | `"plain"` | Plain text only — no formatting, saves `innerText` |
 | `"image"` | Replaces an `<img>` element's `src` via file upload |
 | `"bg-image"` | Replaces a container's `backgroundImage` CSS via file upload |
+| `"video"` | Replaces a `<video>` element's `src` via file upload (mp4/webm) |
 
 ```html
 <!-- Rich text (headings, descriptions) -->
@@ -56,9 +57,29 @@ Marks the element as editable in the canvas editor. Four modes:
 >
   ...
 </header>
+
+<!-- Video replacement (mp4/webm) -->
+<video
+  data-ohw-key="hero-video"
+  data-ohw-editable="video"
+  src="/hero.mp4"
+  autoPlay
+  muted
+  loop
+  playsInline
+/>
 ```
 
 Both `data-ohw-key` and `data-ohw-editable` must be on the **same element**.
+
+Editable videos should be authored with `autoPlay muted loop playsInline` and **no** `controls`,
+so they behave like background media. `muted` is not optional — browsers block autoplay for
+audible video. Authoring these statically keeps the pre-edit render identical.
+
+In the editor, hovering a video exposes **autoplay** and **mute** toggles. These persist to
+draft as `<key>__ohw_autoplay` / `<key>__ohw_muted`. `controls` is derived, not authored:
+an autoplaying video hides its controls, and switching autoplay **off** reveals the native
+controls so a visitor can press play (otherwise nothing would ever start it).
 
 ---
 

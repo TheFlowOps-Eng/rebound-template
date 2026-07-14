@@ -95,6 +95,19 @@ export function Hero({ headline, headlineEm, subhead, cta, background }: Props) 
         >
           {cta.label}
         </Link>
+
+        {/* SCAFFOLDING (OHH-485): throwaway editable video for manual QA of video replace.
+            Not real template content — remove before this template ships. */}
+        <video
+          data-ohw-editable="video"
+          data-ohw-key="hero-video"
+          src="https://www.w3schools.com/html/mov_bbb.mp4"
+          autoPlay
+          muted
+          loop
+          playsInline
+          style={{ width: 320, maxWidth: "100%", display: "block" }}
+        />
       </div>
     </section>
   );
