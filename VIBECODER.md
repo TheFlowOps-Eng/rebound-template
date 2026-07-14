@@ -67,6 +67,7 @@ Marks the element as editable in the canvas editor. Five modes:
   muted
   loop
   playsInline
+  style="width: 320px; aspect-ratio: 16 / 9; object-fit: contain; background-color: var(--umber-deep)"
 />
 ```
 
@@ -75,6 +76,20 @@ Both `data-ohw-key` and `data-ohw-editable` must be on the **same element**.
 Editable videos should be authored with `autoPlay muted loop playsInline` and **no** `controls`,
 so they behave like background media. `muted` is not optional — browsers block autoplay for
 audible video. Authoring these statically keeps the pre-edit render identical.
+
+**Always give an editable video a fixed box** — an `aspect-ratio` (or explicit height) plus
+`object-fit`. A video with an auto height takes its height from the clip's intrinsic size, so
+when the owner replaces it with a taller clip the element grows and pushes the rest of the page
+down. With a fixed box the layout never moves, whatever they upload.
+
+Use `object-fit: contain` to fit the whole clip inside the box (letterboxed — nothing is cut
+off), or `object-fit: cover` to fill the box edge-to-edge (cropped). The editor defaults an
+unstyled video to `contain`, but an explicit choice in the template always wins.
+
+With `contain`, also set a **`background-color`** (a Brand Kit token). A `<video>` is
+transparent by default, so whenever the uploaded clip's ratio differs from the box, the
+letterbox bars would otherwise show whatever sits behind the element. The editor falls back to
+`var(--color-dark, #000)` if the template doesn't set one.
 
 In the editor, hovering a video exposes **autoplay** and **mute** toggles. These persist to
 draft as `<key>__ohw_autoplay` / `<key>__ohw_muted`. `controls` is derived, not authored:
