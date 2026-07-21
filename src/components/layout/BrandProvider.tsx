@@ -41,6 +41,13 @@ const cssVars = (() => {
     lines.push(`--tracking-${kebab(k)}: ${v};`);
   }
 
+  // Heading weight (h1/h2/h3 — universal across the codebase)
+  lines.push(`--font-weight-heading: ${brand.weight.heading};`);
+
+  // Section h2 size — canonical scale shared with external components
+  // (e.g. the scheduling widget), mirroring StudioIntro's clamp().
+  lines.push(`--fs-section-h2: ${brand.headingScale.sectionH2};`);
+
   // Line height
   for (const [k, v] of Object.entries(brand.lineHeight)) {
     lines.push(`--lh-${kebab(k)}: ${v};`);

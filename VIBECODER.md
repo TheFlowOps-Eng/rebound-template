@@ -20,7 +20,7 @@ A **unique string identifier** for each editable node. This is the key used to s
 - Keys are **stable** — changing a key after deployment loses saved content for that node
 
 ### `data-ohw-editable`
-Marks the element as editable in the canvas editor. Four modes:
+Marks the element as editable in the canvas editor. Five modes:
 
 | Value | Behavior |
 |-------|----------|
@@ -28,6 +28,7 @@ Marks the element as editable in the canvas editor. Four modes:
 | `"plain"` | Plain text only — no formatting, saves `innerText` |
 | `"image"` | Replaces an `<img>` element's `src` via file upload |
 | `"bg-image"` | Replaces a container's `backgroundImage` CSS via file upload |
+| `"video"` | Replaces a `<video>` element's `src` via file upload (mp4/webm) |
 
 ```html
 <!-- Rich text (headings, descriptions) -->
@@ -56,9 +57,44 @@ Marks the element as editable in the canvas editor. Four modes:
 >
   ...
 </header>
+
+<!-- Video replacement (mp4/webm) -->
+<video
+  data-ohw-key="hero-video"
+  data-ohw-editable="video"
+  src="/hero.mp4"
+  autoPlay
+  muted
+  loop
+  playsInline
+  style="width: 320px; aspect-ratio: 16 / 9; object-fit: contain; background-color: var(--umber-deep)"
+/>
 ```
 
 Both `data-ohw-key` and `data-ohw-editable` must be on the **same element**.
+
+Editable videos should be authored with `autoPlay muted loop playsInline` and **no** `controls`,
+so they behave like background media. `muted` is not optional — browsers block autoplay for
+audible video. Authoring these statically keeps the pre-edit render identical.
+
+**Always give an editable video a fixed box** — an `aspect-ratio` (or explicit height) plus
+`object-fit`. A video with an auto height takes its height from the clip's intrinsic size, so
+when the owner replaces it with a taller clip the element grows and pushes the rest of the page
+down. With a fixed box the layout never moves, whatever they upload.
+
+Use `object-fit: contain` to fit the whole clip inside the box (letterboxed — nothing is cut
+off), or `object-fit: cover` to fill the box edge-to-edge (cropped). The editor defaults an
+unstyled video to `contain`, but an explicit choice in the template always wins.
+
+With `contain`, also set a **`background-color`** (a Brand Kit token). A `<video>` is
+transparent by default, so whenever the uploaded clip's ratio differs from the box, the
+letterbox bars would otherwise show whatever sits behind the element. The editor falls back to
+`var(--color-dark, #000)` if the template doesn't set one.
+
+In the editor, hovering a video exposes **autoplay** and **mute** toggles. These persist to
+draft as `<key>__ohw_autoplay` / `<key>__ohw_muted`. `controls` is derived, not authored:
+an autoplaying video hides its controls, and switching autoplay **off** reveals the native
+controls so a visitor can press play (otherwise nothing would ever start it).
 
 ---
 
@@ -283,6 +319,46 @@ Use a plain `<a>` with `data-ohw-href-key` for links whose **destination URL** i
 | `data-ohw-role="navbar-button"` | Marks a navbar CTA — first click shows **Edit link** + **More** toolbar |
 
 The bridge keeps `href` in sync across React re-renders — templates do not need a wrapper component.
+
+### Reorderable footer links
+
+To enable bridge-managed drag-and-drop for footer links and columns, use the following structure:
+
+```tsx
+<footer>
+  <div data-ohw-footer-links="">
+    {columns.map((column, columnIndex) => (
+      <div key={column.id} data-ohw-footer-col={String(columnIndex)}>
+        {column.items.map((item, itemIndex) => (
+          <a
+            key={item.id}
+            href={item.href}
+            data-ohw-href-key={`footer-${columnIndex}-${itemIndex}-href`}
+          >
+            <span
+              data-ohw-editable="text"
+              data-ohw-key={`footer-${columnIndex}-${itemIndex}-label`}
+            >
+              {item.label}
+            </span>
+          </a>
+        ))}
+      </div>
+    ))}
+  </div>
+</footer>
+```
+
+| Attribute / key                          | Purpose                                                          |
+| ---------------------------------------- | ---------------------------------------------------------------- |
+| `data-ohw-footer-links`                  | Marks the direct wrapper containing the footer columns           |
+| `data-ohw-footer-col`                    | Marks each direct child as a reorderable column                  |
+| `footer-{columnIndex}-{itemIndex}-href`  | Required `data-ohw-href-key` format for reorderable footer links |
+| `footer-{columnIndex}-{itemIndex}-label` | Recommended stable key for the editable link label               |
+
+The bridge supplies the drag handle, drop indicators, ordering behavior, and persistence. Templates should only provide this markup and must not implement their own drag-and-drop logic.
+
+Keep footer keys stable after a template is released. Changing them disconnects previously saved link destinations, labels, and ordering data.
 
 ### Two-phase editing (navbar button only)
 

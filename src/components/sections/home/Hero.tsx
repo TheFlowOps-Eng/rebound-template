@@ -95,6 +95,29 @@ export function Hero({ headline, headlineEm, subhead, cta, background }: Props) 
         >
           {cta.label}
         </Link>
+
+        {/* SCAFFOLDING (OHH-485): throwaway editable video for manual QA of video replace.
+            Not real template content — remove before this template ships. */}
+        <video
+          data-ohw-editable="video"
+          data-ohw-key="hero-video"
+          src="https://www.w3schools.com/html/mov_bbb.mp4"
+          autoPlay
+          muted
+          loop
+          playsInline
+          // aspectRatio + objectFit pin the box: without them the height is driven by the
+          // video's intrinsic size, so replacing this with a taller clip would reflow the page.
+          // backgroundColor backs the letterbox bars `contain` leaves when ratios differ.
+          style={{
+            width: 320,
+            maxWidth: "100%",
+            aspectRatio: "16 / 9",
+            objectFit: "contain",
+            backgroundColor: "var(--umber-deep)",
+            display: "block",
+          }}
+        />
       </div>
     </section>
   );
