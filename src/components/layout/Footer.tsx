@@ -141,7 +141,7 @@ export function Footer() {
 
         <div className="rb-footer-links">
           {f.columns.map((c, i) => (
-            <div key={i} className="rb-footer-link-col">
+            <div key={i} className="rb-footer-link-col" data-ohw-footer-col="">
               {c.items.map((item, j) => (
                 <a
                   key={j}
