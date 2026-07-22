@@ -72,16 +72,6 @@ export function Footer() {
           flex-direction: column;
           gap: 10px;
         }
-        .rb-footer-link-col a:focus,
-        .rb-footer-link-col a:focus-visible {
-          outline: none;
-          box-shadow: none;
-        }
-        .rb-footer-socials a:focus,
-        .rb-footer-socials a:focus-visible {
-          outline: none;
-          box-shadow: none;
-        }
         .rb-footer-socials {
           display: flex;
           gap: 16px;
