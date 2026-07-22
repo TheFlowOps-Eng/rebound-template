@@ -284,6 +284,33 @@ Use a plain `<a>` with `data-ohw-href-key` for links whose **destination URL** i
 
 The bridge keeps `href` in sync across React re-renders — templates do not need a wrapper component.
 
+### Reorderable navbar links
+
+Top-level nav links inside `[data-ohw-nav-container]` / `[data-ohw-nav-drawer]` with `data-ohw-href-key="nav-{i}-href"` are reorderable by the bridge (drag handle or press-to-drag). Persist order via `__ohw_nav_order`. Templates must not implement their own DnD.
+
+Optional dropdown markup (for reparent / nested reorder — used when subitems exist):
+
+```tsx
+<div data-ohw-nav-group="">
+  <a href="/classes" data-ohw-href-key="nav-1-href">
+    <span data-ohw-editable="text" data-ohw-key="nav-1-label">Classes</span>
+  </a>
+  <div data-ohw-nav-children="">
+    <a href="/classes/yoga" data-ohw-href-key="nav-2-href">
+      <span data-ohw-editable="text" data-ohw-key="nav-2-label">Yoga</span>
+    </a>
+  </div>
+</div>
+```
+
+| Attribute | Purpose |
+|-----------|---------|
+| `data-ohw-nav-group` | Wraps a dropdown trigger + its children |
+| `data-ohw-nav-children` | Direct children container for dropdown subitems |
+| `nav-{i}-href` | Stable href key (ids unchanged across reorder) |
+
+`data-ohw-role="navbar-button"` (book CTA) and `data-ohw-drag-disabled` items are not reorderable.
+
 ### Reorderable footer links
 
 To enable bridge-managed drag-and-drop for footer links and columns, use the following structure:
