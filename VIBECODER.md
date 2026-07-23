@@ -284,6 +284,46 @@ Use a plain `<a>` with `data-ohw-href-key` for links whose **destination URL** i
 
 The bridge keeps `href` in sync across React re-renders — templates do not need a wrapper component.
 
+### Reorderable footer links
+
+To enable bridge-managed drag-and-drop for footer links and columns, use the following structure:
+
+```tsx
+<footer>
+  <div data-ohw-footer-links="">
+    {columns.map((column, columnIndex) => (
+      <div key={column.id} data-ohw-footer-col={String(columnIndex)}>
+        {column.items.map((item, itemIndex) => (
+          <a
+            key={item.id}
+            href={item.href}
+            data-ohw-href-key={`footer-${columnIndex}-${itemIndex}-href`}
+          >
+            <span
+              data-ohw-editable="text"
+              data-ohw-key={`footer-${columnIndex}-${itemIndex}-label`}
+            >
+              {item.label}
+            </span>
+          </a>
+        ))}
+      </div>
+    ))}
+  </div>
+</footer>
+```
+
+| Attribute / key                          | Purpose                                                          |
+| ---------------------------------------- | ---------------------------------------------------------------- |
+| `data-ohw-footer-links`                  | Marks the direct wrapper containing the footer columns           |
+| `data-ohw-footer-col`                    | Marks each direct child as a reorderable column                  |
+| `footer-{columnIndex}-{itemIndex}-href`  | Required `data-ohw-href-key` format for reorderable footer links |
+| `footer-{columnIndex}-{itemIndex}-label` | Recommended stable key for the editable link label               |
+
+The bridge supplies the drag handle, drop indicators, ordering behavior, and persistence. Templates should only provide this markup and must not implement their own drag-and-drop logic.
+
+Keep footer keys stable after a template is released. Changing them disconnects previously saved link destinations, labels, and ordering data.
+
 ### Two-phase editing (navbar button only)
 
 For elements with `data-ohw-role="navbar-button"`:
