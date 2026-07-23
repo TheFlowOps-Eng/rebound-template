@@ -93,7 +93,10 @@ export type NavItem = { href: string; label: string };
 
 export type SocialLink = { name: string; href: string };
 
-export type FooterLinkColumn = { items: Array<{ label: string; href: string }> };
+export type FooterLinkColumn = {
+  heading: string;
+  items: Array<{ label: string; href: string }>;
+};
 
 export type GlobalContent = {
   nav: NavItem[];

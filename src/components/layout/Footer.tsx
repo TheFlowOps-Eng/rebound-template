@@ -23,6 +23,17 @@ export function Footer() {
     color: "var(--ink)",
     margin: 0,
   };
+  const headingStyle = {
+    fontFamily: "var(--font-body)",
+    fontWeight: 800 as const,
+    fontSize: 14,
+    color: "var(--espresso, #3d312b)",
+    opacity: 0.82,
+    margin: 0,
+    marginBottom: 6,
+    padding: 0,
+    lineHeight: 1.2,
+  };
   const linkStyle = {
     fontFamily: "var(--font-body)",
     fontWeight: 700 as const,
@@ -63,12 +74,12 @@ export function Footer() {
           display: block;
         }
         .rb-footer-links {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
+          display: flex;
           gap: 24px;
         }
         .rb-footer-link-col {
           display: flex;
+          flex: 1;
           flex-direction: column;
           gap: 10px;
         }
@@ -104,7 +115,7 @@ export function Footer() {
           .rb-footer-brand { gap: 24px; }
           .rb-footer-logo { height: 32px; }
           .rb-footer-links {
-            grid-template-columns: 1fr;
+            flex-direction: column;
             gap: 28px;
             padding-top: 28px;
             border-top: 1px solid rgba(26,22,18,.18);
@@ -146,6 +157,13 @@ export function Footer() {
               className="rb-footer-link-col"
               data-ohw-footer-col={String(i)}
             >
+              <p
+                data-ohw-editable="text"
+                data-ohw-key={`footer-${i}-heading`}
+                style={headingStyle}
+              >
+                {c.heading}
+              </p>
               {c.items.map((item, j) => (
                 <a
                   key={j}
