@@ -17,6 +17,7 @@ export const globalContent: GlobalContent = {
     email: "hello@rebound.studio",
     columns: [
       {
+        heading: "Heading",
         items: [
           { label: "Classes & Schedule", href: "/classes" },
           { label: "Booking", href: "/contact" },
@@ -25,6 +26,7 @@ export const globalContent: GlobalContent = {
         ],
       },
       {
+        heading: "Heading",
         items: [
           { label: "About Us", href: "/about" },
           { label: "Our Team", href: "/instructors" },
