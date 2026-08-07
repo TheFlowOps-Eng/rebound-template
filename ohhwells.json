@@ -1,7 +1,14 @@
 {
-  "template": {
-    "name": "rebound-stage-2",
-    "displayName": "Rebound Stage 2",
-    "category": "wellness"
-  }
+  "template": [
+    {
+      "name": "rebound-stage-2",
+      "displayName": "Rebound Stage 2",
+      "category": "wellness"
+    },
+    {
+      "name": "rebound-local",
+      "displayName": "Rebound Stage 2",
+      "category": "wellness"
+    }
+  ]
 }
